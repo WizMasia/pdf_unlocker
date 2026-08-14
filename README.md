@@ -4,7 +4,7 @@
 > **외부 통신이 전혀 없는 100% 오프라인 무손실 PDF 권한 재조정(Change Permissions) 및 보안 해제 도구**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Release](https://img.shields.io/badge/Release-v0.2.0-emerald.svg)](https://github.com/)
+[![Release](https://img.shields.io/badge/Release-v0.3.0-emerald.svg)](https://github.com/WizMasia/pdf_unlocker/releases)
 
 ---
 

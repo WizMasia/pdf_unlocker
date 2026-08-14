@@ -1,0 +1,4306 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Permission Master | PDF 권한 관리 및 해제</title>
+  <meta name="description" content="100% 브라우저 로컬에서 안전하게 PDF의 인쇄, 복사, 수정, 주석 등의 권한을 재조정하거나 완전히 해제하는 오프라인 무손실 도구">
+  <style>
+/* Inlined: styles/main.css */
+/**
+ * @file src/styles/main.css
+ * @description Premium HSL-based Modern Design System for PDF Permission Master.
+ *              PDF 권한 관리 및 해제 도구를 위한 HSL 기반 모던 디자인 시스템.
+ */
+
+:root {
+  /* HSL Color Palette / HSL 기반 색상 팔레트 */
+  --primary-h: 217;
+  --primary-s: 91%;
+  --primary-l: 60%;
+  --primary: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
+  --primary-hover: hsl(var(--primary-h), var(--primary-s), 52%);
+  --primary-light: hsl(var(--primary-h), var(--primary-s), 95%);
+  --primary-glow: hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.25);
+
+  --emerald-h: 152;
+  --emerald-s: 76%;
+  --emerald-l: 40%;
+  --emerald: hsl(var(--emerald-h), var(--emerald-s), var(--emerald-l));
+  --emerald-light: hsl(var(--emerald-h), var(--emerald-s), 95%);
+
+  --amber-h: 38;
+  --amber-s: 92%;
+  --amber-l: 50%;
+  --amber: hsl(var(--amber-h), var(--amber-s), var(--amber-l));
+  --amber-light: hsl(var(--amber-h), var(--amber-s), 95%);
+
+  --rose-h: 350;
+  --rose-s: 89%;
+  --rose-l: 60%;
+  --rose: hsl(var(--rose-h), var(--rose-s), var(--rose-l));
+  --rose-light: hsl(var(--rose-h), var(--rose-s), 95%);
+
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-alt: #f1f5f9;
+  --border: #e2e8f0;
+  --border-focus: #94a3b8;
+
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-sub: #94a3b8;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
+
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+}
+
+/* Reset & Base / 기본 리셋 */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* App Container / 레이아웃 컨테이너 */
+.app-container {
+  max-width: 1020px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Header / 헤더 */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--primary);
+  color: white;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.logo-text h1 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-main);
+}
+
+.logo-text p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Badges / 뱃지 */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.security-badge {
+  background: var(--emerald-light);
+  color: var(--emerald);
+  border: 1px solid hsla(var(--emerald-h), var(--emerald-s), var(--emerald-l), 0.2);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Mode Switcher Tabs / 모드 탭 */
+.mode-tabs {
+  display: flex;
+  gap: 8px;
+  background: var(--surface-alt);
+  padding: 6px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tab-btn:hover {
+  color: var(--text-main);
+}
+
+.tab-btn.active {
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Config Panel / 권한 설정 패널 */
+.config-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-normal);
+}
+
+.config-panel.hidden {
+  display: none;
+}
+
+/* Preset Chips / 프리셋 칩 */
+.preset-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.preset-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.preset-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip-btn {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.chip-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.chip-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+/* Config Grid */
+.config-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .config-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.config-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+/* Print Radio Group */
+.print-group {
+  background: var(--surface-alt);
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.radio-label input[type="radio"] {
+  accent-color: var(--primary);
+  width: 16px;
+  height: 16px;
+}
+
+/* Toggle List & Switches */
+.toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toggle-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  gap: 12px;
+}
+
+.toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toggle-title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.toggle-desc {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+/* Switch UI */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #cbd5e1;
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--primary);
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* Forms & Inputs */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.input-text, .input-select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-main);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.input-text:focus, .input-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.field-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Drop Zone / 드래그 앤 드롭 영역 */
+.drop-zone {
+  border: 2px dashed #cbd5e1;
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  padding: 40px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  outline: none;
+  margin-bottom: 24px;
+}
+
+.drop-zone:hover, .drop-zone.dragover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.file-input {
+  display: none;
+}
+
+.drop-zone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.upload-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  background: var(--surface-alt);
+  color: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.drop-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.drop-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  max-width: 500px;
+}
+
+.privacy-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--emerald);
+  background: var(--emerald-light);
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+/* Queue Section / 작업 큐 */
+.queue-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+
+.queue-section.hidden {
+  display: none;
+}
+
+.queue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.queue-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.queue-title-wrapper h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.count-badge {
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.queue-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* File List & Items */
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.file-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all var(--transition-fast);
+}
+
+.file-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.file-icon {
+  color: var(--rose);
+}
+
+.file-name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-main);
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-size {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.file-status-badge {
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.status-analyzing, .status-processing, .status-decrypting {
+  background: var(--amber-light);
+  color: var(--amber);
+}
+
+.status-ready {
+  background: var(--surface-alt);
+  color: var(--text-muted);
+}
+
+.status-done {
+  background: var(--emerald-light);
+  color: var(--emerald);
+}
+
+.status-error {
+  background: var(--rose-light);
+  color: var(--rose);
+}
+
+/* File Permission Matrix inside Item */
+.file-perms-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  background: var(--surface-alt);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+}
+
+.perm-pill {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.perm-pill.allowed {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.perm-pill.restricted {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.file-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Buttons / 버튼 시스템 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  box-shadow: 0 2px 8px var(--primary-glow);
+}
+
+.btn-secondary {
+  background: var(--surface-alt);
+  color: var(--text-main);
+  border-color: var(--border);
+}
+
+.btn-secondary:hover {
+  background: #e2e8f0;
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 0.78rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Modal / 모달 */
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-backdrop {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.modal-content {
+  position: relative;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 440px;
+  width: 90%;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-content h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.modal-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Footer / 푸터 */
+.app-footer {
+  margin-top: auto;
+  text-align: center;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  color: var(--text-sub);
+  font-size: 0.78rem;
+}
+
+</style>
+</head>
+<body>
+  <div id="app" class="app-container">
+    <!-- Header / 헤더 -->
+    <header class="app-header">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="2"/>
+            <path d="M7 7h10"/>
+            <path d="M7 12h10"/>
+            <path d="M7 17h6"/>
+          </svg>
+        </div>
+        <div class="logo-text">
+          <h1 data-i18n="appTitle">PDF Permission Master</h1>
+          <p data-i18n="appSubtitle">100% Offline Lossless PDF Permission Reconfigurer & Security Unlocker</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="badge security-badge">
+          <span class="dot"></span>
+          <span data-i18n="offlineBadge">100% Local & Offline</span>
+        </div>
+        <button id="langToggleBtn" class="btn btn-secondary btn-sm" aria-label="Language Toggle">EN / KO</button>
+      </div>
+    </header>
+
+    <!-- Mode Selector Tabs / 모드 전환 탭 -->
+    <nav class="mode-tabs" role="tablist">
+      <button id="tabChangePerms" class="tab-btn active" role="tab" aria-selected="true" data-tab="changePerms">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        <span data-i18n="tabChangePerms">⚙️ 권한 재조정 (Change Permissions)</span>
+      </button>
+      <button id="tabUnlockPerms" class="tab-btn" role="tab" aria-selected="false" data-tab="unlockPerms">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+        </svg>
+        <span data-i18n="tabUnlockPerms">🔓 권한 완전 해제 (Unlock)</span>
+      </button>
+    </nav>
+
+    <!-- Main Content / 메인 컨텐츠 -->
+    <main class="app-main">
+
+      <!-- Permissions Setting Panel (Change Permissions Mode) / 권한 설정 패널 -->
+      <section id="permConfigPanel" class="config-panel">
+        <!-- Preset Selector / 빠른 프리셋 선택 -->
+        <div class="preset-row">
+          <span class="preset-label" data-i18n="presetLabel">빠른 권한 프리셋:</span>
+          <div class="preset-chips">
+            <button type="button" class="chip-btn" data-preset="full" data-i18n="presetFull">모두 허용</button>
+            <button type="button" class="chip-btn active" data-preset="readPrint" data-i18n="presetReadPrint">읽기 및 인쇄 전용</button>
+            <button type="button" class="chip-btn" data-preset="readOnly" data-i18n="presetReadOnly">엄격한 열람 전용</button>
+            <button type="button" class="chip-btn" data-preset="custom" data-i18n="presetCustom">사용자 지정</button>
+          </div>
+        </div>
+
+        <div class="config-grid">
+          <!-- Left: Permissions Matrix / 세부 권한 설정 -->
+          <div class="config-card">
+            <h2 class="card-title" data-i18n="permSectionTitle">세부 권한 설정 (Permissions Configuration)</h2>
+
+            <!-- Print Permissions Radio -->
+            <div class="form-group print-group">
+              <label class="form-label" data-i18n="permPrintLabel">인쇄 허용 (Printing)</label>
+              <div class="radio-group">
+                <label class="radio-label">
+                  <input type="radio" name="permPrint" value="high" checked />
+                  <span data-i18n="permPrintHigh">고품질 인쇄 허용</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="permPrint" value="low" />
+                  <span data-i18n="permPrintLow">저해상도(150dpi)만 허용</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="permPrint" value="none" />
+                  <span data-i18n="permPrintNone">인쇄 금지</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Toggles for other permissions -->
+            <div class="toggle-list">
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title" data-i18n="permCopyLabel">내용 복사 및 텍스트 추출 (Copy & Extract)</span>
+                  <span class="toggle-desc" data-i18n="permCopyDesc">텍스트 및 그래픽의 클립보드 복사를 허용합니다</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="permCopy" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title" data-i18n="permModifyLabel">문서 내용 수정 (Modify Content)</span>
+                  <span class="toggle-desc" data-i18n="permModifyDesc">페이지 본문 편집 및 변경을 허용합니다</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="permModify" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title" data-i18n="permAnnotateLabel">주석 및 메모 작성 (Annotations & Comments)</span>
+                  <span class="toggle-desc" data-i18n="permAnnotateDesc">주석, 메모, 서명 필드 수정을 허용합니다</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="permAnnotate" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title" data-i18n="permFillFormsLabel">양식 필드 입력 (Form Filling)</span>
+                  <span class="toggle-desc" data-i18n="permFillFormsDesc">대화형 폼 필드 입력 및 저장을 허용합니다</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="permFillForms" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title" data-i18n="permAssembleLabel">문서 조합 (Document Assembly)</span>
+                  <span class="toggle-desc" data-i18n="permAssembleDesc">페이지 삽입, 삭제, 회전 및 북마크 생성을 허용합니다</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="permAssemble" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title" data-i18n="permExtractAccessibilityLabel">접근성 낭독 추출 (Accessibility)</span>
+                  <span class="toggle-desc" data-i18n="permExtractAccessibilityDesc">시각 장애인을 위한 화면 낭독기 텍스트 추출을 허용합니다</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="permExtractAccessibility" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Security & Passwords / 암호화 및 비밀번호 설정 -->
+          <div class="config-card">
+            <h2 class="card-title" data-i18n="securitySectionTitle">암호화 및 비밀번호 설정 (Security & Passwords)</h2>
+
+            <div class="form-group">
+              <label class="form-label" for="ownerPasswordInput" data-i18n="ownerPasswordLabel">권한 관리자 암호 (Owner Password)</label>
+              <input type="password" id="ownerPasswordInput" class="input-text" data-i18n-placeholder="ownerPasswordPlaceholder" placeholder="관리자 암호 (미입력 시 자동 생성)" autocomplete="off" />
+              <span class="field-hint" data-i18n="ownerPasswordDesc">권한 설정을 보호하고 변경을 제한하는 마스터 암호입니다</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="userPasswordInput" data-i18n="userPasswordLabel">문서 열람 암호 (User Password - 선택 사항)</label>
+              <input type="password" id="userPasswordInput" class="input-text" data-i18n-placeholder="userPasswordPlaceholder" placeholder="열람 암호 (선택 사항)" autocomplete="off" />
+              <span class="field-hint" data-i18n="userPasswordDesc">문서를 열 때 입력해야 하는 암호입니다 (비워두면 암호 없이 즉시 열림)</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="algorithmSelect" data-i18n="algorithmLabel">암호화 표준 (Encryption Standard)</label>
+              <select id="algorithmSelect" class="input-select">
+                <option value="AES-128" selected>AES-128 (Standard Security Rev 4 - 권장)</option>
+                <option value="RC4-128">RC4-128 (Standard Security Rev 3)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Drop Zone / 드래그 앤 드롭 영역 -->
+      <section id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="Upload PDF Files">
+        <input type="file" id="fileInput" class="file-input" accept="application/pdf" multiple />
+        <div class="drop-zone-content">
+          <div class="upload-icon-wrapper">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" x2="12" y1="3" y2="15"/>
+            </svg>
+          </div>
+          <h2 class="drop-title" data-i18n="dropTitle">PDF 파일을 여기에 드래그하거나 클릭하여 선택하세요</h2>
+          <p class="drop-desc" data-i18n="dropDesc">서버 업로드 없이 100% 브라우저 메모리 내에서 안전하고 무손실로 처리됩니다</p>
+          <div class="privacy-note">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span data-i18n="privacyNote">모든 처리는 브라우저 로컬에서 안전하게 수행되며 파일이 외부로 전송되지 않습니다</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Action & Queue Section / 파일 목록 및 상태 -->
+      <section id="queueSection" class="queue-section hidden">
+        <div class="queue-header">
+          <div class="queue-title-wrapper">
+            <h3 data-i18n="queueTitle">작업 파일 목록</h3>
+            <span id="queueCountBadge" class="count-badge">0</span>
+          </div>
+          <div class="queue-actions">
+            <button id="clearAllBtn" class="btn btn-secondary btn-sm" data-i18n="clearAllBtn">전체 지우기</button>
+            <button id="actionAllBtn" class="btn btn-primary" data-i18n="applyAllBtn">선택한 권한 일괄 적용</button>
+          </div>
+        </div>
+
+        <div id="fileList" class="file-list"></div>
+      </section>
+    </main>
+
+    <!-- Password Modal / 비밀번호 입력 모달 -->
+    <div id="passwordModal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <h3 data-i18n="modalTitle">문서 열기 비밀번호 필요</h3>
+        <p id="modalFileDesc" class="modal-desc" data-i18n="modalFileDesc">이 문서는 열람 암호가 걸려 있습니다. 비밀번호를 입력하면 권한 재조정 또는 해제가 가능합니다.</p>
+        <div class="form-group">
+          <input type="password" id="modalPasswordInput" class="input-text" data-i18n-placeholder="modalPasswordPlaceholder" placeholder="비밀번호를 입력하세요" autocomplete="off" />
+        </div>
+        <div class="modal-actions">
+          <button id="modalCancelBtn" class="btn btn-secondary" data-i18n="modalCancelBtn">취소</button>
+          <button id="modalConfirmBtn" class="btn btn-primary" data-i18n="modalConfirmBtn">확인</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer / 푸터 -->
+    <footer class="app-footer">
+      <p data-i18n="footerText">PDF Permission Master &copy; 2026 — Zero-dependency, 100% Client-side Security & Permission Control</p>
+    </footer>
+  </div>
+
+  <!-- Development Scripts / 개발용 스크립트 모듈 -->
+  
+  
+  
+  
+  
+  
+  
+<script>
+(function() {
+'use strict';
+
+/* ==========================================================================
+ * PDF Permission Master - Standalone Offline Bundle
+ * 100% Client-side, Zero Network Calls, Privacy Protected
+ * ========================================================================== */
+
+/* Module: ui/i18n.js */
+/**
+ * @file src/ui/i18n.js
+ * @description Internationalization dictionary and helper for PDF Permission Manager.
+ *              PDF 권한 관리 및 해제 웹 애플리케이션의 다국어(한국어/영어) 리소스 사전 및 헬퍼.
+ */
+
+const translations = {
+  ko: {
+    appTitle: 'PDF 권한 관리기',
+    appSubtitle: '100% 오프라인 무손실 PDF 권한 재조정(Change Permissions) 및 보안 해제 도구',
+    offlineBadge: '100% 로컬 & 오프라인',
+    tabChangePerms: '⚙️ 권한 재조정 (Change Permissions)',
+    tabUnlockPerms: '🔓 권한 완전 해제 (Unlock)',
+    
+    // Presets
+    presetLabel: '빠른 권한 프리셋',
+    presetFull: '모두 허용',
+    presetReadPrint: '읽기 및 인쇄 전용',
+    presetReadOnly: '엄격한 열람 전용 (인쇄/복사 금지)',
+    presetCustom: '사용자 지정',
+    
+    // Permission Controls
+    permSectionTitle: '세부 권한 설정 (Permissions Configuration)',
+    permPrintLabel: '인쇄 허용 (Printing)',
+    permPrintHigh: '고품질 인쇄 허용',
+    permPrintLow: '저해상도(150dpi)만 허용',
+    permPrintNone: '인쇄 금지',
+    
+    permCopyLabel: '내용 복사 및 텍스트 추출 (Copy & Extract)',
+    permCopyDesc: '텍스트 및 그래픽의 클립보드 복사를 허용합니다',
+    
+    permModifyLabel: '문서 내용 수정 (Modify Content)',
+    permModifyDesc: '페이지 본문 편집 및 변경을 허용합니다',
+    
+    permAnnotateLabel: '주석 및 메모 작성 (Annotations & Comments)',
+    permAnnotateDesc: '주석, 메모, 서명 필드 수정을 허용합니다',
+    
+    permFillFormsLabel: '양식 필드 입력 (Form Filling)',
+    permFillFormsDesc: '대화형 폼 필드 입력 및 저장을 허용합니다',
+    
+    permAssembleLabel: '문서 조합 (Document Assembly)',
+    permAssembleDesc: '페이지 삽입, 삭제, 회전 및 북마크 생성을 허용합니다',
+    
+    permExtractAccessibilityLabel: '접근성 낭독 추출 (Accessibility)',
+    permExtractAccessibilityDesc: '시각 장애인을 위한 화면 낭독기 텍스트 추출을 허용합니다',
+    
+    // Security & Passwords
+    securitySectionTitle: '암호화 및 비밀번호 설정 (Security & Passwords)',
+    ownerPasswordLabel: '권한 관리자 암호 (Owner Password)',
+    ownerPasswordDesc: '권한 설정을 보호하고 변경을 제한하는 마스터 암호입니다',
+    ownerPasswordPlaceholder: '관리자 암호 (미입력 시 자동 생성)',
+    userPasswordLabel: '문서 열람 암호 (User Password - 선택 사항)',
+    userPasswordDesc: '문서를 열 때 입력해야 하는 암호입니다 (비워두면 암호 없이 즉시 열림)',
+    userPasswordPlaceholder: '열람 암호 (선택 사항)',
+    algorithmLabel: '암호화 표준 (Encryption Standard)',
+    
+    // Drop Zone
+    dropTitle: 'PDF 파일을 여기에 드래그하거나 클릭하여 선택하세요',
+    dropDesc: '서버 업로드 없이 100% 브라우저 메모리 내에서 안전하고 무손실로 처리됩니다',
+    privacyNote: '모든 처리는 브라우저 로컬에서 안전하게 수행되며 파일이 외부로 전송되지 않습니다',
+    
+    // Queue & Actions
+    queueTitle: '작업 파일 목록',
+    clearAllBtn: '전체 지우기',
+    applyAllBtn: '선택한 권한 일괄 적용',
+    unlockAllBtn: '모든 권한 일괄 해제',
+    applySingleBtn: '권한 적용 및 다운로드',
+    downloadUnlockedBtn: '해제된 PDF 다운로드',
+    
+    // Status & Badges
+    statusReady: '대기 중',
+    statusAnalyzing: '권한 분석 중...',
+    statusProcessing: '권한 재설정 및 암호화 중...',
+    statusDecrypting: '무손실 복호화 중...',
+    statusDone: '처리 완료',
+    statusError: '처리 실패',
+    
+    // Current vs New permissions view
+    currentPerms: '현재 권한',
+    targetPerms: '변경 권한',
+    permAllowed: '허용',
+    permRestricted: '제한',
+    encryptedBadge: '암호화됨',
+    unencryptedBadge: '비암호화',
+    
+    // Password Modal
+    modalTitle: '문서 열기 비밀번호 필요',
+    modalFileDesc: '이 문서는 열람 암호가 걸려 있습니다. 비밀번호를 입력하면 권한 재조정 또는 해제가 가능합니다.',
+    modalPasswordPlaceholder: '비밀번호를 입력하세요',
+    modalCancelBtn: '취소',
+    modalConfirmBtn: '확인',
+    invalidPassword: '비밀번호가 올바르지 않습니다.',
+    
+    footerText: 'PDF Permission Master © 2026 — Zero-dependency, 100% Client-side Security & Permission Control'
+  },
+  en: {
+    appTitle: 'PDF Permission Master',
+    appSubtitle: '100% Offline Lossless PDF Permission Reconfigurer & Security Unlocker',
+    offlineBadge: '100% Local & Offline',
+    tabChangePerms: '⚙️ Change Permissions',
+    tabUnlockPerms: '🔓 Unlock All Permissions',
+    
+    // Presets
+    presetLabel: 'Quick Presets',
+    presetFull: 'Full Access',
+    presetReadPrint: 'Read & Print Only',
+    presetReadOnly: 'Strict Read Only (No Print/Copy)',
+    presetCustom: 'Custom',
+    
+    // Permission Controls
+    permSectionTitle: 'Permissions Configuration',
+    permPrintLabel: 'Printing Permission',
+    permPrintHigh: 'Allow High Quality',
+    permPrintLow: 'Allow Low-Res (150 dpi) Only',
+    permPrintNone: 'Deny Printing',
+    
+    permCopyLabel: 'Copy Content & Extract Text',
+    permCopyDesc: 'Allow copying text and graphics to clipboard',
+    
+    permModifyLabel: 'Modify Document Content',
+    permModifyDesc: 'Allow editing and modifying page contents',
+    
+    permAnnotateLabel: 'Annotations & Comments',
+    permAnnotateDesc: 'Allow adding annotations, comments, and signatures',
+    
+    permFillFormsLabel: 'Fill Interactive Forms',
+    permFillFormsDesc: 'Allow filling form fields and signing',
+    
+    permAssembleLabel: 'Document Assembly',
+    permAssembleDesc: 'Allow page insertion, deletion, rotation, and bookmarks',
+    
+    permExtractAccessibilityLabel: 'Extract for Accessibility',
+    permExtractAccessibilityDesc: 'Allow screen readers to extract text for users with disabilities',
+    
+    // Security & Passwords
+    securitySectionTitle: 'Security & Passwords',
+    ownerPasswordLabel: 'Owner / Master Password',
+    ownerPasswordDesc: 'Master password used to enforce and modify permissions',
+    ownerPasswordPlaceholder: 'Owner password (auto-generated if blank)',
+    userPasswordLabel: 'Open / User Password (Optional)',
+    userPasswordDesc: 'Password required to open the PDF (leave blank for password-free viewing)',
+    userPasswordPlaceholder: 'User password (optional)',
+    algorithmLabel: 'Encryption Standard',
+    
+    // Drop Zone
+    dropTitle: 'Drag & Drop PDF files here or click to browse',
+    dropDesc: '100% Client-side in browser memory with zero quality loss or server uploads',
+    privacyNote: 'Files are processed locally in your browser and never uploaded anywhere',
+    
+    // Queue & Actions
+    queueTitle: 'File Queue',
+    clearAllBtn: 'Clear All',
+    applyAllBtn: 'Apply Permissions to All',
+    unlockAllBtn: 'Unlock All Files',
+    applySingleBtn: 'Apply & Download',
+    downloadUnlockedBtn: 'Download Unlocked PDF',
+    
+    // Status & Badges
+    statusReady: 'Ready',
+    statusAnalyzing: 'Analyzing security...',
+    statusProcessing: 'Applying permissions & encrypting...',
+    statusDecrypting: 'Decrypting losslessly...',
+    statusDone: 'Completed',
+    statusError: 'Failed',
+    
+    // Current vs New permissions view
+    currentPerms: 'Current',
+    targetPerms: 'Target',
+    permAllowed: 'Allowed',
+    permRestricted: 'Restricted',
+    encryptedBadge: 'Encrypted',
+    unencryptedBadge: 'Unencrypted',
+    
+    // Password Modal
+    modalTitle: 'Open Password Required',
+    modalFileDesc: 'This document requires an open password. Please enter the password to process permissions.',
+    modalPasswordPlaceholder: 'Enter password',
+    modalCancelBtn: 'Cancel',
+    modalConfirmBtn: 'Confirm',
+    invalidPassword: 'Password is incorrect.',
+    
+    footerText: 'PDF Permission Master © 2026 — Zero-dependency, 100% Client-side Security & Permission Control'
+  }
+};
+
+let currentLang = 'ko';
+
+function getLanguage() {
+  return currentLang;
+}
+
+function setLanguage(lang) {
+  if (translations[lang]) {
+    currentLang = lang;
+    updateDomTexts();
+  }
+}
+
+function t(key) {
+  return (translations[currentLang] && translations[currentLang][key]) || (translations['en'] && translations['en'][key]) || key;
+}
+
+function updateDomTexts() {
+  const elements = document.querySelectorAll('[data-i18n]');
+  elements.forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (key && translations[currentLang][key]) {
+      el.textContent = translations[currentLang][key];
+    }
+  });
+
+  const placeholders = document.querySelectorAll('[data-i18n-placeholder]');
+  placeholders.forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (key && translations[currentLang][key]) {
+      el.placeholder = translations[currentLang][key];
+    }
+  });
+}
+
+/* Module: core/crypto.js */
+/**
+ * @file src/core/crypto.js
+ * @description Pure JavaScript implementations of MD5, SHA-256, SHA-384, SHA-512, RC4,
+ *              AES-128-CBC, and AES-256-CBC with zero external dependencies.
+ *              순수 자바스크립트로 구현된 외부 의존성 없는 MD5, SHA-256, SHA-384, SHA-512, RC4,
+ *              AES-128/256-CBC 암복호화 엔진.
+ */
+
+// ============================================================================
+// 1. MD5 Implementation (RFC 1321)
+// ============================================================================
+
+function md5Cycle(x, k) {
+  let a = x[0], b = x[1], c = x[2], d = x[3];
+
+  a = ff(a, b, c, d, k[0], 7, -680876936);
+  d = ff(d, a, b, c, k[1], 12, -389564586);
+  c = ff(c, d, a, b, k[2], 17, 606105819);
+  b = ff(b, c, d, a, k[3], 22, -1044525330);
+  a = ff(a, b, c, d, k[4], 7, -176418897);
+  d = ff(d, a, b, c, k[5], 12, 1200080426);
+  c = ff(c, d, a, b, k[6], 17, -1473231341);
+  b = ff(b, c, d, a, k[7], 22, -45705983);
+  a = ff(a, b, c, d, k[8], 7, 1770035416);
+  d = ff(d, a, b, c, k[9], 12, -1958414417);
+  c = ff(c, d, a, b, k[10], 17, -42063);
+  b = ff(b, c, d, a, k[11], 22, -1990404162);
+  a = ff(a, b, c, d, k[12], 7, 1804603682);
+  d = ff(d, a, b, c, k[13], 12, -40341101);
+  c = ff(c, d, a, b, k[14], 17, -1502002290);
+  b = ff(b, c, d, a, k[15], 22, 1236535329);
+
+  a = gg(a, b, c, d, k[1], 5, -165796510);
+  d = gg(d, a, b, c, k[6], 9, -1069501632);
+  c = gg(c, d, a, b, k[11], 14, 643717713);
+  b = gg(b, c, d, a, k[0], 20, -373897302);
+  a = gg(a, b, c, d, k[5], 5, -701558691);
+  d = gg(d, a, b, c, k[10], 9, 38016083);
+  c = gg(c, d, a, b, k[15], 14, -660478335);
+  b = gg(b, c, d, a, k[4], 20, -405537848);
+  a = gg(a, b, c, d, k[9], 5, 568446438);
+  d = gg(d, a, b, c, k[14], 9, -1019803690);
+  c = gg(c, d, a, b, k[3], 14, -187363961);
+  b = gg(b, c, d, a, k[8], 20, 1163531501);
+  a = gg(a, b, c, d, k[13], 5, -1444681467);
+  d = gg(d, a, b, c, k[2], 9, -51403784);
+  c = gg(c, d, a, b, k[7], 14, 1735328473);
+  b = gg(b, c, d, a, k[12], 20, -1926607734);
+
+  a = hh(a, b, c, d, k[5], 4, -378558);
+  d = hh(d, a, b, c, k[8], 11, -2022574463);
+  c = hh(c, d, a, b, k[11], 16, 1839030562);
+  b = hh(b, c, d, a, k[14], 23, -35309556);
+  a = hh(a, b, c, d, k[1], 4, -1530992060);
+  d = hh(d, a, b, c, k[4], 11, 1272893353);
+  c = hh(c, d, a, b, k[7], 16, -155497632);
+  b = hh(b, c, d, a, k[10], 23, -1094730640);
+  a = hh(a, b, c, d, k[13], 4, 681279174);
+  d = hh(d, a, b, c, k[0], 11, -358537222);
+  c = hh(c, d, a, b, k[3], 16, -722521979);
+  b = hh(b, c, d, a, k[6], 23, 76029189);
+  a = hh(a, b, c, d, k[9], 4, -640364487);
+  d = hh(d, a, b, c, k[12], 11, -421815835);
+  c = hh(c, d, a, b, k[15], 16, 530742520);
+  b = hh(b, c, d, a, k[2], 23, -995338651);
+
+  a = ii(a, b, c, d, k[0], 6, -198630844);
+  d = ii(d, a, b, c, k[7], 10, 1126891415);
+  c = ii(c, d, a, b, k[14], 15, -1416354905);
+  b = ii(b, c, d, a, k[5], 21, -57434055);
+  a = ii(a, b, c, d, k[12], 6, 1700485571);
+  d = ii(d, a, b, c, k[3], 10, -1894986606);
+  c = ii(c, d, a, b, k[10], 15, -1051523);
+  b = ii(b, c, d, a, k[1], 21, -2054922799);
+  a = ii(a, b, c, d, k[8], 6, 1873313359);
+  d = ii(d, a, b, c, k[15], 10, -30611744);
+  c = ii(c, d, a, b, k[6], 15, -1560198380);
+  b = ii(b, c, d, a, k[13], 21, 1309151649);
+  a = ii(a, b, c, d, k[4], 6, -145523070);
+  d = ii(d, a, b, c, k[11], 10, -1120210379);
+  c = ii(c, d, a, b, k[2], 15, 718787259);
+  b = ii(b, c, d, a, k[9], 21, -343485551);
+
+  x[0] = (a + x[0]) | 0;
+  x[1] = (b + x[1]) | 0;
+  x[2] = (c + x[2]) | 0;
+  x[3] = (d + x[3]) | 0;
+}
+
+function cmn(q, a, b, x, s, t) {
+  a = (a + q + x + t) | 0;
+  return (((a << s) | (a >>> (32 - s))) + b) | 0;
+}
+function ff(a, b, c, d, x, s, t) { return cmn((b & c) | ((~b) & d), a, b, x, s, t); }
+function gg(a, b, c, d, x, s, t) { return cmn((b & d) | (c & (~d)), a, b, x, s, t); }
+function hh(a, b, c, d, x, s, t) { return cmn(b ^ c ^ d, a, b, x, s, t); }
+function ii(a, b, c, d, x, s, t) { return cmn(c ^ (b | (~d)), a, b, x, s, t); }
+
+function md5(data) {
+  if (typeof data === 'string') {
+    data = new TextEncoder().encode(data);
+  } else if (!(data instanceof Uint8Array)) {
+    data = new Uint8Array(data);
+  }
+
+  const n = data.length;
+  const state = [1732584193, -271733879, -1732584194, 271733878];
+  let i;
+
+  for (i = 64; i <= n; i += 64) {
+    const chunk = new Int32Array(16);
+    for (let j = 0; j < 16; j++) {
+      const idx = (i - 64) + (j * 4);
+      chunk[j] = data[idx] | (data[idx + 1] << 8) | (data[idx + 2] << 16) | (data[idx + 3] << 24);
+    }
+    md5Cycle(state, chunk);
+  }
+
+  const tail = new Uint8Array(64);
+  const remaining = n - (i - 64);
+  for (let j = 0; j < remaining; j++) {
+    tail[j] = data[(i - 64) + j];
+  }
+  tail[remaining] = 0x80;
+
+  if (remaining > 55) {
+    const chunk1 = new Int32Array(16);
+    for (let j = 0; j < 16; j++) {
+      chunk1[j] = tail[j * 4] | (tail[j * 4 + 1] << 8) | (tail[j * 4 + 2] << 16) | (tail[j * 4 + 3] << 24);
+    }
+    md5Cycle(state, chunk1);
+    tail.fill(0);
+  }
+
+  const bitLen = n * 8;
+  tail[56] = bitLen & 0xff;
+  tail[57] = (bitLen >>> 8) & 0xff;
+  tail[58] = (bitLen >>> 16) & 0xff;
+  tail[59] = (bitLen >>> 24) & 0xff;
+
+  const chunk2 = new Int32Array(16);
+  for (let j = 0; j < 16; j++) {
+    chunk2[j] = tail[j * 4] | (tail[j * 4 + 1] << 8) | (tail[j * 4 + 2] << 16) | (tail[j * 4 + 3] << 24);
+  }
+  md5Cycle(state, chunk2);
+
+  const out = new Uint8Array(16);
+  for (let j = 0; j < 4; j++) {
+    out[j * 4] = state[j] & 0xff;
+    out[j * 4 + 1] = (state[j] >>> 8) & 0xff;
+    out[j * 4 + 2] = (state[j] >>> 16) & 0xff;
+    out[j * 4 + 3] = (state[j] >>> 24) & 0xff;
+  }
+  return out;
+}
+
+// ============================================================================
+// 2. SHA-256 Implementation (FIPS 180-4)
+// ============================================================================
+
+const K256 = new Uint32Array([
+  0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+  0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+  0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+  0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+  0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+  0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+  0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+  0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+]);
+
+function rotr(x, n) {
+  return ((x >>> n) | (x << (32 - n))) >>> 0;
+}
+
+function sha256(data) {
+  if (typeof data === 'string') {
+    data = new TextEncoder().encode(data);
+  } else if (!(data instanceof Uint8Array)) {
+    data = new Uint8Array(data);
+  }
+
+  let H0 = 0x6a09e667, H1 = 0xbb67ae85, H2 = 0x3c6ef372, H3 = 0xa54ff53a;
+  let H4 = 0x510e527f, H5 = 0x9b05688c, H6 = 0x1f83d9ab, H7 = 0x5be0cd19;
+
+  const byteLen = data.length;
+  const bitLen = byteLen * 8;
+
+  const padLen = (56 - ((byteLen + 1) % 64) + 64) % 64;
+  const totalLen = byteLen + 1 + padLen + 8;
+  const padded = new Uint8Array(totalLen);
+  padded.set(data, 0);
+  padded[byteLen] = 0x80;
+
+  const view = new DataView(padded.buffer, padded.byteOffset, padded.byteLength);
+  view.setUint32(totalLen - 4, bitLen >>> 0, false);
+  view.setUint32(totalLen - 8, Math.floor(bitLen / 0x100000000), false);
+
+  const W = new Uint32Array(64);
+
+  for (let offset = 0; offset < totalLen; offset += 64) {
+    for (let i = 0; i < 16; i++) {
+      W[i] = view.getUint32(offset + i * 4, false);
+    }
+    for (let i = 16; i < 64; i++) {
+      const s0 = rotr(W[i - 15], 7) ^ rotr(W[i - 15], 18) ^ (W[i - 15] >>> 3);
+      const s1 = rotr(W[i - 2], 17) ^ rotr(W[i - 2], 19) ^ (W[i - 2] >>> 10);
+      W[i] = (W[i - 16] + s0 + W[i - 7] + s1) >>> 0;
+    }
+
+    let a = H0, b = H1, c = H2, d = H3, e = H4, f = H5, g = H6, h = H7;
+
+    for (let i = 0; i < 64; i++) {
+      const S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
+      const ch = (e & f) ^ ((~e) & g);
+      const temp1 = (h + S1 + ch + K256[i] + W[i]) >>> 0;
+      const S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
+      const maj = (a & b) ^ (a & c) ^ (b & c);
+      const temp2 = (S0 + maj) >>> 0;
+
+      h = g;
+      g = f;
+      f = e;
+      e = (d + temp1) >>> 0;
+      d = c;
+      c = b;
+      b = a;
+      a = (temp1 + temp2) >>> 0;
+    }
+
+    H0 = (H0 + a) >>> 0;
+    H1 = (H1 + b) >>> 0;
+    H2 = (H2 + c) >>> 0;
+    H3 = (H3 + d) >>> 0;
+    H4 = (H4 + e) >>> 0;
+    H5 = (H5 + f) >>> 0;
+    H6 = (H6 + g) >>> 0;
+    H7 = (H7 + h) >>> 0;
+  }
+
+  const out = new Uint8Array(32);
+  const outView = new DataView(out.buffer, out.byteOffset, out.byteLength);
+  outView.setUint32(0, H0, false);
+  outView.setUint32(4, H1, false);
+  outView.setUint32(8, H2, false);
+  outView.setUint32(12, H3, false);
+  outView.setUint32(16, H4, false);
+  outView.setUint32(20, H5, false);
+  outView.setUint32(24, H6, false);
+  outView.setUint32(28, H7, false);
+  return out;
+}
+
+// ============================================================================
+// 3. SHA-384 & SHA-512 Implementation (Word64-based for 100% standard compliance)
+// ============================================================================
+
+class Word64 {
+  constructor(highInteger, lowInteger) {
+    this.high = highInteger | 0;
+    this.low = lowInteger | 0;
+  }
+
+  and(word) {
+    this.high &= word.high;
+    this.low &= word.low;
+  }
+
+  xor(word) {
+    this.high ^= word.high;
+    this.low ^= word.low;
+  }
+
+  shiftRight(places) {
+    if (places >= 32) {
+      this.low = (this.high >>> (places - 32)) | 0;
+      this.high = 0;
+    } else {
+      this.low = (this.low >>> places) | (this.high << (32 - places));
+      this.high = (this.high >>> places) | 0;
+    }
+  }
+
+  rotateRight(places) {
+    let low, high;
+    if (places & 32) {
+      high = this.low;
+      low = this.high;
+    } else {
+      low = this.low;
+      high = this.high;
+    }
+    places &= 31;
+    this.low = (low >>> places) | (high << (32 - places));
+    this.high = (high >>> places) | (low << (32 - places));
+  }
+
+  not() {
+    this.high = ~this.high;
+    this.low = ~this.low;
+  }
+
+  add(word) {
+    const lowAdd = (this.low >>> 0) + (word.low >>> 0);
+    let highAdd = (this.high >>> 0) + (word.high >>> 0);
+    if (lowAdd > 0xffffffff) {
+      highAdd += 1;
+    }
+    this.low = lowAdd | 0;
+    this.high = highAdd | 0;
+  }
+
+  copyTo(bytes, offset) {
+    bytes[offset] = (this.high >>> 24) & 0xff;
+    bytes[offset + 1] = (this.high >> 16) & 0xff;
+    bytes[offset + 2] = (this.high >> 8) & 0xff;
+    bytes[offset + 3] = this.high & 0xff;
+    bytes[offset + 4] = (this.low >>> 24) & 0xff;
+    bytes[offset + 5] = (this.low >> 16) & 0xff;
+    bytes[offset + 6] = (this.low >> 8) & 0xff;
+    bytes[offset + 7] = this.low & 0xff;
+  }
+
+  assign(word) {
+    this.high = word.high;
+    this.low = word.low;
+  }
+}
+
+const K512_WORDS = [
+  new Word64(0x428a2f98, 0xd728ae22), new Word64(0x71374491, 0x23ef65cd),
+  new Word64(0xb5c0fbcf, 0xec4d3b2f), new Word64(0xe9b5dba5, 0x8189dbbc),
+  new Word64(0x3956c25b, 0xf348b538), new Word64(0x59f111f1, 0xb605d019),
+  new Word64(0x923f82a4, 0xaf194f9b), new Word64(0xab1c5ed5, 0xda6d8118),
+  new Word64(0xd807aa98, 0xa3030242), new Word64(0x12835b01, 0x45706fbe),
+  new Word64(0x243185be, 0x4ee4b28c), new Word64(0x550c7dc3, 0xd5ffb4e2),
+  new Word64(0x72be5d74, 0xf27b896f), new Word64(0x80deb1fe, 0x3b1696b1),
+  new Word64(0x9bdc06a7, 0x25c71235), new Word64(0xc19bf174, 0xcf692694),
+  new Word64(0xe49b69c1, 0x9ef14ad2), new Word64(0xefbe4786, 0x384f25e3),
+  new Word64(0x0fc19dc6, 0x8b8cd5b5), new Word64(0x240ca1cc, 0x77ac9c65),
+  new Word64(0x2de92c6f, 0x592b0275), new Word64(0x4a7484aa, 0x6ea6e483),
+  new Word64(0x5cb0a9dc, 0xbd41fbd4), new Word64(0x76f988da, 0x831153b5),
+  new Word64(0x983e5152, 0xee66dfab), new Word64(0xa831c66d, 0x2db43210),
+  new Word64(0xb00327c8, 0x98fb213f), new Word64(0xbf597fc7, 0xbeef0ee4),
+  new Word64(0xc6e00bf3, 0x3da88fc2), new Word64(0xd5a79147, 0x930aa725),
+  new Word64(0x06ca6351, 0xe003826f), new Word64(0x14292967, 0x0a0e6e70),
+  new Word64(0x27b70a85, 0x46d22ffc), new Word64(0x2e1b2138, 0x5c26c926),
+  new Word64(0x4d2c6dfc, 0x5ac42aed), new Word64(0x53380d13, 0x9d95b3df),
+  new Word64(0x650a7354, 0x8baf63de), new Word64(0x766a0abb, 0x3c77b2a8),
+  new Word64(0x81c2c92e, 0x47edaee6), new Word64(0x92722c85, 0x1482353b),
+  new Word64(0xa2bfe8a1, 0x4cf10364), new Word64(0xa81a664b, 0xbc423001),
+  new Word64(0xc24b8b70, 0xd0f89791), new Word64(0xc76c51a3, 0x0654be30),
+  new Word64(0xd192e819, 0xd6ef5218), new Word64(0xd6990624, 0x5565a910),
+  new Word64(0xf40e3585, 0x5771202a), new Word64(0x106aa070, 0x32bbd1b8),
+  new Word64(0x19a4c116, 0xb8d2d0c8), new Word64(0x1e376c08, 0x5141ab53),
+  new Word64(0x2748774c, 0xdf8eeb99), new Word64(0x34b0bcb5, 0xe19b48a8),
+  new Word64(0x391c0cb3, 0xc5c95a63), new Word64(0x4ed8aa4a, 0xe3418acb),
+  new Word64(0x5b9cca4f, 0x7763e373), new Word64(0x682e6ff3, 0xd6b2b8a3),
+  new Word64(0x748f82ee, 0x5defb2fc), new Word64(0x78a5636f, 0x43172f60),
+  new Word64(0x84c87814, 0xa1f0ab72), new Word64(0x8cc70208, 0x1a6439ec),
+  new Word64(0x90befffa, 0x23631e28), new Word64(0xa4506ceb, 0xde82bde9),
+  new Word64(0xbef9a3f7, 0xb2c67915), new Word64(0xc67178f2, 0xe372532b),
+  new Word64(0xca273ece, 0xea26619c), new Word64(0xd186b8c7, 0x21c0c207),
+  new Word64(0xeada7dd6, 0xcde0eb1e), new Word64(0xf57d4f7f, 0xee6ed178),
+  new Word64(0x06f067aa, 0x72176fba), new Word64(0x0a637dc5, 0xa2c898a6),
+  new Word64(0x113f9804, 0xbef90dae), new Word64(0x1b710b35, 0x131c471b),
+  new Word64(0x28db77f5, 0x23047d84), new Word64(0x32caab7b, 0x40c72493),
+  new Word64(0x3c9ebe0a, 0x15c9bebc), new Word64(0x431d67c4, 0x9c100d4c),
+  new Word64(0x4cc5d4be, 0xcb3e42b6), new Word64(0x597f299c, 0xfc657e2a),
+  new Word64(0x5fcb6fab, 0x3ad6faec), new Word64(0x6c44198c, 0x4a475817)
+];
+
+function ch512(result, x, y, z, tmp) {
+  result.assign(x);
+  result.and(y);
+  tmp.assign(x);
+  tmp.not();
+  tmp.and(z);
+  result.xor(tmp);
+}
+
+function maj512(result, x, y, z, tmp) {
+  result.assign(x);
+  result.and(y);
+  tmp.assign(x);
+  tmp.and(z);
+  result.xor(tmp);
+  tmp.assign(y);
+  tmp.and(z);
+  result.xor(tmp);
+}
+
+function sigma512(result, x, tmp) {
+  result.assign(x);
+  result.rotateRight(28);
+  tmp.assign(x);
+  tmp.rotateRight(34);
+  result.xor(tmp);
+  tmp.assign(x);
+  tmp.rotateRight(39);
+  result.xor(tmp);
+}
+
+function sigmaPrime512(result, x, tmp) {
+  result.assign(x);
+  result.rotateRight(14);
+  tmp.assign(x);
+  tmp.rotateRight(18);
+  result.xor(tmp);
+  tmp.assign(x);
+  tmp.rotateRight(41);
+  result.xor(tmp);
+}
+
+function littleSigma512(result, x, tmp) {
+  result.assign(x);
+  result.rotateRight(1);
+  tmp.assign(x);
+  tmp.rotateRight(8);
+  result.xor(tmp);
+  tmp.assign(x);
+  tmp.shiftRight(7);
+  result.xor(tmp);
+}
+
+function littleSigmaPrime512(result, x, tmp) {
+  result.assign(x);
+  result.rotateRight(19);
+  tmp.assign(x);
+  tmp.rotateRight(61);
+  result.xor(tmp);
+  tmp.assign(x);
+  tmp.shiftRight(6);
+  result.xor(tmp);
+}
+
+function computeSha512Internal(data, mode384 = false) {
+  if (typeof data === 'string') {
+    data = new TextEncoder().encode(data);
+  } else if (!(data instanceof Uint8Array)) {
+    data = new Uint8Array(data);
+  }
+
+  let h0, h1, h2, h3, h4, h5, h6, h7;
+  if (!mode384) {
+    h0 = new Word64(0x6a09e667, 0xf3bcc908);
+    h1 = new Word64(0xbb67ae85, 0x84caa73b);
+    h2 = new Word64(0x3c6ef372, 0xfe94f82b);
+    h3 = new Word64(0xa54ff53a, 0x5f1d36f1);
+    h4 = new Word64(0x510e527f, 0xade682d1);
+    h5 = new Word64(0x9b05688c, 0x2b3e6c1f);
+    h6 = new Word64(0x1f83d9ab, 0xfb41bd6b);
+    h7 = new Word64(0x5be0cd19, 0x137e2179);
+  } else {
+    h0 = new Word64(0xcbbb9d5d, 0xc1059ed8);
+    h1 = new Word64(0x629a292a, 0x367cd507);
+    h2 = new Word64(0x9159015a, 0x3070dd17);
+    h3 = new Word64(0x152fecd8, 0xf70e5939);
+    h4 = new Word64(0x67332667, 0xffc00b31);
+    h5 = new Word64(0x8eb44a87, 0x68581511);
+    h6 = new Word64(0xdb0c2e0d, 0x64f98fa7);
+    h7 = new Word64(0x47b5481d, 0xbefa4fa4);
+  }
+
+  const length = data.length;
+  const paddedLength = Math.ceil((length + 17) / 128) * 128;
+  const padded = new Uint8Array(paddedLength);
+  let i, j;
+  for (i = 0; i < length; ++i) {
+    padded[i] = data[i];
+  }
+  padded[i++] = 0x80;
+  const n = paddedLength - 16;
+  if (i < n) {
+    i = n;
+  }
+  i += 11;
+  padded[i++] = (length >>> 29) & 0xff;
+  padded[i++] = (length >> 21) & 0xff;
+  padded[i++] = (length >> 13) & 0xff;
+  padded[i++] = (length >> 5) & 0xff;
+  padded[i++] = (length << 3) & 0xff;
+
+  const w = new Array(80);
+  for (i = 0; i < 80; i++) {
+    w[i] = new Word64(0, 0);
+  }
+
+  let a = new Word64(0, 0), b = new Word64(0, 0), c = new Word64(0, 0);
+  let d = new Word64(0, 0), e = new Word64(0, 0), f = new Word64(0, 0);
+  let g = new Word64(0, 0), h = new Word64(0, 0);
+  const t1 = new Word64(0, 0), t2 = new Word64(0, 0);
+  const tmp1 = new Word64(0, 0), tmp2 = new Word64(0, 0);
+  let tmp3;
+
+  for (i = 0; i < paddedLength;) {
+    for (j = 0; j < 16; ++j) {
+      w[j].high = (padded[i] << 24) | (padded[i + 1] << 16) | (padded[i + 2] << 8) | padded[i + 3];
+      w[j].low = (padded[i + 4] << 24) | (padded[i + 5] << 16) | (padded[i + 6] << 8) | padded[i + 7];
+      i += 8;
+    }
+    for (j = 16; j < 80; ++j) {
+      tmp3 = w[j];
+      littleSigmaPrime512(tmp3, w[j - 2], tmp2);
+      tmp3.add(w[j - 7]);
+      littleSigma512(tmp1, w[j - 15], tmp2);
+      tmp3.add(tmp1);
+      tmp3.add(w[j - 16]);
+    }
+
+    a.assign(h0); b.assign(h1); c.assign(h2); d.assign(h3);
+    e.assign(h4); f.assign(h5); g.assign(h6); h.assign(h7);
+
+    for (j = 0; j < 80; ++j) {
+      t1.assign(h);
+      sigmaPrime512(tmp1, e, tmp2);
+      t1.add(tmp1);
+      ch512(tmp1, e, f, g, tmp2);
+      t1.add(tmp1);
+      t1.add(K512_WORDS[j]);
+      t1.add(w[j]);
+
+      sigma512(t2, a, tmp2);
+      maj512(tmp1, a, b, c, tmp2);
+      t2.add(tmp1);
+
+      tmp3 = h;
+      h = g;
+      g = f;
+      f = e;
+      d.add(t1);
+      e = d;
+      d = c;
+      c = b;
+      b = a;
+      tmp3.assign(t1);
+      tmp3.add(t2);
+      a = tmp3;
+    }
+    h0.add(a); h1.add(b); h2.add(c); h3.add(d);
+    h4.add(e); h5.add(f); h6.add(g); h7.add(h);
+  }
+
+  if (!mode384) {
+    const result = new Uint8Array(64);
+    h0.copyTo(result, 0); h1.copyTo(result, 8); h2.copyTo(result, 16); h3.copyTo(result, 24);
+    h4.copyTo(result, 32); h5.copyTo(result, 40); h6.copyTo(result, 48); h7.copyTo(result, 56);
+    return result;
+  } else {
+    const result = new Uint8Array(48);
+    h0.copyTo(result, 0); h1.copyTo(result, 8); h2.copyTo(result, 16); h3.copyTo(result, 24);
+    h4.copyTo(result, 32); h5.copyTo(result, 40);
+    return result;
+  }
+}
+
+function sha384(data) {
+  return computeSha512Internal(data, true);
+}
+
+function sha512(data) {
+  return computeSha512Internal(data, false);
+}
+
+// ============================================================================
+// 4. ISO 32000-2 Algorithm 2.B (Revision 6 Hardened Hashing)
+// ============================================================================
+
+const HASH_FUNCS_2B = [sha256, sha384, sha512];
+
+function computeHash2B(input, password, userKey = null) {
+  let k = sha256(input);
+  let e = null;
+
+  for (let round = 0; round < 64 || (e && (e[e.length - 1] & 0xFF) > round - 32); round++) {
+    const hasU = userKey && userKey.length >= 48;
+    const blockSize = password.length + k.length + (hasU ? 48 : 0);
+    const k1 = new Uint8Array(64 * blockSize);
+
+    let pos = 0;
+    for (let i = 0; i < 64; i++) {
+      k1.set(password, pos);
+      pos += password.length;
+      k1.set(k, pos);
+      pos += k.length;
+      if (hasU) {
+        k1.set(userKey.subarray(0, 48), pos);
+        pos += 48;
+      }
+    }
+
+    const kFirst = k.subarray(0, 16);
+    const kSecond = k.subarray(16, 32);
+
+    // AES-128-CBC encryption of k1 without padding
+    e = aesEncryptCbc(kFirst, kSecond, k1, false);
+
+    // BigInteger remainder mod 3 from first 16 bytes
+    let rem = 0;
+    for (let i = 0; i < 16; i++) {
+      rem = (rem * 256 + e[i]) % 3;
+    }
+
+    const nextHashFn = HASH_FUNCS_2B[rem];
+    k = nextHashFn(e);
+  }
+
+  return k.subarray(0, 32);
+}
+
+function computeHash2A(password, salt, u = null) {
+  let userKey = null;
+  if (u && u.length >= 48) {
+    userKey = u.subarray(0, 48);
+  }
+  const passTrunc = password.length > 127 ? password.subarray(0, 127) : password;
+
+  let totalLen = passTrunc.length + salt.length + (userKey ? 48 : 0);
+  const input = new Uint8Array(totalLen);
+  input.set(passTrunc, 0);
+  input.set(salt, passTrunc.length);
+  if (userKey) {
+    input.set(userKey, passTrunc.length + salt.length);
+  }
+
+  return computeHash2B(input, passTrunc, userKey);
+}
+
+// ============================================================================
+// 5. RC4 (ARCFOUR) Stream Cipher
+// ============================================================================
+
+function rc4(key, data) {
+  if (typeof key === 'string') key = new TextEncoder().encode(key);
+  if (typeof data === 'string') data = new TextEncoder().encode(data);
+  if (!(key instanceof Uint8Array)) key = new Uint8Array(key);
+  if (!(data instanceof Uint8Array)) data = new Uint8Array(data);
+
+  const s = new Uint8Array(256);
+  for (let i = 0; i < 256; i++) s[i] = i;
+
+  let j = 0;
+  for (let i = 0; i < 256; i++) {
+    j = (j + s[i] + key[i % key.length]) & 0xff;
+    const tmp = s[i];
+    s[i] = s[j];
+    s[j] = tmp;
+  }
+
+  let i = 0;
+  j = 0;
+  const out = new Uint8Array(data.length);
+  for (let k = 0; k < data.length; k++) {
+    i = (i + 1) & 0xff;
+    j = (j + s[i]) & 0xff;
+    const tmp = s[i];
+    s[i] = s[j];
+    s[j] = tmp;
+    out[k] = data[k] ^ s[(s[i] + s[j]) & 0xff];
+  }
+  return out;
+}
+
+// ============================================================================
+// 6. AES-128 & AES-256 (CBC mode) Implementation
+// ============================================================================
+
+const S_BOX = new Uint8Array([
+  0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
+  0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
+  0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15,
+  0x04, 0xc7, 0x23, 0xc3, 0x18, 0x96, 0x05, 0x9a, 0x07, 0x12, 0x80, 0xe2, 0xeb, 0x27, 0xb2, 0x75,
+  0x09, 0x83, 0x2c, 0x1a, 0x1b, 0x6e, 0x5a, 0xa0, 0x52, 0x3b, 0xd6, 0xb3, 0x29, 0xe3, 0x2f, 0x84,
+  0x53, 0xd1, 0x00, 0xed, 0x20, 0xfc, 0xb1, 0x5b, 0x6a, 0xcb, 0xbe, 0x39, 0x4a, 0x4c, 0x58, 0xcf,
+  0xd0, 0xef, 0xaa, 0xfb, 0x43, 0x4d, 0x33, 0x85, 0x45, 0xf9, 0x02, 0x7f, 0x50, 0x3c, 0x9f, 0xa8,
+  0x51, 0xa3, 0x40, 0x8f, 0x92, 0x9d, 0x38, 0xf5, 0xbc, 0xb6, 0xda, 0x21, 0x10, 0xff, 0xf3, 0xd2,
+  0xcd, 0x0c, 0x13, 0xec, 0x5f, 0x97, 0x44, 0x17, 0xc4, 0xa7, 0x7e, 0x3d, 0x64, 0x5d, 0x19, 0x73,
+  0x60, 0x81, 0x4f, 0xdc, 0x22, 0x2a, 0x90, 0x88, 0x46, 0xee, 0xb8, 0x14, 0xde, 0x5e, 0x0b, 0xdb,
+  0xe0, 0x32, 0x3a, 0x0a, 0x49, 0x06, 0x24, 0x5c, 0xc2, 0xd3, 0xac, 0x62, 0x91, 0x95, 0xe4, 0x79,
+  0xe7, 0xc8, 0x37, 0x6d, 0x8d, 0xd5, 0x4e, 0xa9, 0x6c, 0x56, 0xf4, 0xea, 0x65, 0x7a, 0xae, 0x08,
+  0xba, 0x78, 0x25, 0x2e, 0x1c, 0xa6, 0xb4, 0xc6, 0xe8, 0xdd, 0x74, 0x1f, 0x4b, 0xbd, 0x8b, 0x8a,
+  0x70, 0x3e, 0xb5, 0x66, 0x48, 0x03, 0xf6, 0x0e, 0x61, 0x35, 0x57, 0xb9, 0x86, 0xc1, 0x1d, 0x9e,
+  0xe1, 0xf8, 0x98, 0x11, 0x69, 0xd9, 0x8e, 0x94, 0x9b, 0x1e, 0x87, 0xe9, 0xce, 0x55, 0x28, 0xdf,
+  0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
+]);
+
+const INV_S_BOX = new Uint8Array(256);
+for (let i = 0; i < 256; i++) {
+  INV_S_BOX[S_BOX[i]] = i;
+}
+
+const RCON = new Uint32Array([
+  0x00000000, 0x01000000, 0x02000000, 0x04000000, 0x08000000,
+  0x10000000, 0x20000000, 0x40000000, 0x80000000, 0x1b000000,
+  0x36000000
+]);
+
+function gmul(a, b) {
+  let p = 0;
+  for (let i = 0; i < 8; i++) {
+    if (b & 1) p ^= a;
+    const hiBitSet = a & 0x80;
+    a = (a << 1) & 0xff;
+    if (hiBitSet) a ^= 0x1b;
+    b >>= 1;
+  }
+  return p;
+}
+
+function expandKey(keyBytes) {
+  const Nk = keyBytes.length / 4; // 4 for 128-bit, 8 for 256-bit
+  const Nr = Nk + 6;              // 10 for 128-bit, 14 for 256-bit
+  const Nb = 4;
+  const w = new Uint32Array(Nb * (Nr + 1));
+
+  for (let i = 0; i < Nk; i++) {
+    w[i] = (keyBytes[4 * i] << 24) | (keyBytes[4 * i + 1] << 16) | (keyBytes[4 * i + 2] << 8) | (keyBytes[4 * i + 3]);
+  }
+
+  for (let i = Nk; i < Nb * (Nr + 1); i++) {
+    let temp = w[i - 1];
+    if (i % Nk === 0) {
+      temp = ((temp << 8) | (temp >>> 24)) >>> 0;
+      temp = (S_BOX[(temp >>> 24) & 0xff] << 24) | (S_BOX[(temp >>> 16) & 0xff] << 16) | (S_BOX[(temp >>> 8) & 0xff] << 8) | S_BOX[temp & 0xff];
+      temp = (temp ^ RCON[Math.floor(i / Nk)]) >>> 0;
+    } else if (Nk > 6 && i % Nk === 4) {
+      temp = (S_BOX[(temp >>> 24) & 0xff] << 24) | (S_BOX[(temp >>> 16) & 0xff] << 16) | (S_BOX[(temp >>> 8) & 0xff] << 8) | S_BOX[temp & 0xff];
+    }
+    w[i] = (w[i - Nk] ^ temp) >>> 0;
+  }
+
+  return { w, Nr };
+}
+
+function cipherBlock(inputBlock, w, Nr) {
+  const state = new Uint8Array(16);
+  for (let i = 0; i < 16; i++) {
+    state[i] = inputBlock[i];
+  }
+
+  // AddRoundKey 0
+  for (let c = 0; c < 4; c++) {
+    const word = w[c];
+    state[4 * c + 0] ^= (word >>> 24) & 0xff;
+    state[4 * c + 1] ^= (word >>> 16) & 0xff;
+    state[4 * c + 2] ^= (word >>> 8) & 0xff;
+    state[4 * c + 3] ^= word & 0xff;
+  }
+
+  for (let round = 1; round < Nr; round++) {
+    // SubBytes
+    for (let i = 0; i < 16; i++) state[i] = S_BOX[state[i]];
+
+    // ShiftRows
+    const t1 = state[1], t2 = state[2], t3 = state[3];
+    state[1] = state[5]; state[5] = state[9]; state[9] = state[13]; state[13] = t1;
+    state[2] = state[10]; state[10] = t2;
+    const t6 = state[6]; state[6] = state[14]; state[14] = t6;
+    state[3] = state[15]; state[15] = state[11]; state[11] = state[7]; state[7] = t3;
+
+    // MixColumns
+    for (let c = 0; c < 4; c++) {
+      const idx = 4 * c;
+      const s0 = state[idx], s1 = state[idx + 1], s2 = state[idx + 2], s3 = state[idx + 3];
+      state[idx + 0] = gmul(0x02, s0) ^ gmul(0x03, s1) ^ s2 ^ s3;
+      state[idx + 1] = s0 ^ gmul(0x02, s1) ^ gmul(0x03, s2) ^ s3;
+      state[idx + 2] = s0 ^ s1 ^ gmul(0x02, s2) ^ gmul(0x03, s3);
+      state[idx + 3] = gmul(0x03, s0) ^ s1 ^ s2 ^ gmul(0x02, s3);
+    }
+
+    // AddRoundKey
+    for (let c = 0; c < 4; c++) {
+      const word = w[round * 4 + c];
+      state[4 * c + 0] ^= (word >>> 24) & 0xff;
+      state[4 * c + 1] ^= (word >>> 16) & 0xff;
+      state[4 * c + 2] ^= (word >>> 8) & 0xff;
+      state[4 * c + 3] ^= word & 0xff;
+    }
+  }
+
+  // Final round (no MixColumns)
+  for (let i = 0; i < 16; i++) state[i] = S_BOX[state[i]];
+  const t1 = state[1], t2 = state[2], t3 = state[3];
+  state[1] = state[5]; state[5] = state[9]; state[9] = state[13]; state[13] = t1;
+  state[2] = state[10]; state[10] = t2;
+  const t6 = state[6]; state[6] = state[14]; state[14] = t6;
+  state[3] = state[15]; state[15] = state[11]; state[11] = state[7]; state[7] = t3;
+
+  for (let c = 0; c < 4; c++) {
+    const word = w[Nr * 4 + c];
+    state[4 * c + 0] ^= (word >>> 24) & 0xff;
+    state[4 * c + 1] ^= (word >>> 16) & 0xff;
+    state[4 * c + 2] ^= (word >>> 8) & 0xff;
+    state[4 * c + 3] ^= word & 0xff;
+  }
+
+  return state;
+}
+
+function invCipherBlock(inputBlock, w, Nr) {
+  const state = new Uint8Array(16);
+  for (let i = 0; i < 16; i++) {
+    state[i] = inputBlock[i];
+  }
+
+  // AddRoundKey Nr
+  for (let c = 0; c < 4; c++) {
+    const word = w[Nr * 4 + c];
+    state[4 * c + 0] ^= (word >>> 24) & 0xff;
+    state[4 * c + 1] ^= (word >>> 16) & 0xff;
+    state[4 * c + 2] ^= (word >>> 8) & 0xff;
+    state[4 * c + 3] ^= word & 0xff;
+  }
+
+  for (let round = Nr - 1; round >= 1; round--) {
+    // InvShiftRows
+    const t1 = state[13], t2 = state[10], t3 = state[7];
+    state[13] = state[9]; state[9] = state[5]; state[5] = state[1]; state[1] = t1;
+    state[10] = state[2]; state[2] = t2;
+    const t14 = state[14]; state[14] = state[6]; state[6] = t14;
+    state[7] = state[11]; state[11] = state[15]; state[15] = state[3]; state[3] = t3;
+
+    // InvSubBytes
+    for (let i = 0; i < 16; i++) state[i] = INV_S_BOX[state[i]];
+
+    // AddRoundKey
+    for (let c = 0; c < 4; c++) {
+      const word = w[round * 4 + c];
+      state[4 * c + 0] ^= (word >>> 24) & 0xff;
+      state[4 * c + 1] ^= (word >>> 16) & 0xff;
+      state[4 * c + 2] ^= (word >>> 8) & 0xff;
+      state[4 * c + 3] ^= word & 0xff;
+    }
+
+    // InvMixColumns
+    for (let c = 0; c < 4; c++) {
+      const idx = 4 * c;
+      const s0 = state[idx], s1 = state[idx + 1], s2 = state[idx + 2], s3 = state[idx + 3];
+      state[idx + 0] = gmul(0x0e, s0) ^ gmul(0x0b, s1) ^ gmul(0x0d, s2) ^ gmul(0x09, s3);
+      state[idx + 1] = gmul(0x09, s0) ^ gmul(0x0e, s1) ^ gmul(0x0b, s2) ^ gmul(0x0d, s3);
+      state[idx + 2] = gmul(0x0d, s0) ^ gmul(0x09, s1) ^ gmul(0x0e, s2) ^ gmul(0x0b, s3);
+      state[idx + 3] = gmul(0x0b, s0) ^ gmul(0x0d, s1) ^ gmul(0x09, s2) ^ gmul(0x0e, s3);
+    }
+  }
+
+  // InvShiftRows
+  const t1 = state[13], t2 = state[10], t3 = state[7];
+  state[13] = state[9]; state[9] = state[5]; state[5] = state[1]; state[1] = t1;
+  state[10] = state[2]; state[2] = t2;
+  const t14 = state[14]; state[14] = state[6]; state[6] = t14;
+  state[7] = state[11]; state[11] = state[15]; state[15] = state[3]; state[3] = t3;
+
+  // InvSubBytes
+  for (let i = 0; i < 16; i++) state[i] = INV_S_BOX[state[i]];
+
+  // AddRoundKey 0
+  for (let c = 0; c < 4; c++) {
+    const word = w[c];
+    state[4 * c + 0] ^= (word >>> 24) & 0xff;
+    state[4 * c + 1] ^= (word >>> 16) & 0xff;
+    state[4 * c + 2] ^= (word >>> 8) & 0xff;
+    state[4 * c + 3] ^= word & 0xff;
+  }
+
+  return state;
+}
+
+function aesEncryptCbc(key, iv, data, usePadding = true) {
+  if (typeof key === 'string') key = new TextEncoder().encode(key);
+  if (typeof data === 'string') data = new TextEncoder().encode(data);
+  if (!(key instanceof Uint8Array)) key = new Uint8Array(key);
+  if (!(data instanceof Uint8Array)) data = new Uint8Array(data);
+  if (!(iv instanceof Uint8Array)) iv = new Uint8Array(iv);
+
+  let input = data;
+  if (usePadding) {
+    const padLen = 16 - (data.length % 16);
+    input = new Uint8Array(data.length + padLen);
+    input.set(data, 0);
+    input.fill(padLen, data.length);
+  }
+
+  const { w, Nr } = expandKey(key);
+  const out = new Uint8Array(input.length);
+  let currentIv = new Uint8Array(iv.subarray(0, 16));
+
+  for (let i = 0; i < input.length; i += 16) {
+    const block = new Uint8Array(16);
+    for (let j = 0; j < 16; j++) {
+      block[j] = input[i + j] ^ currentIv[j];
+    }
+    const encrypted = cipherBlock(block, w, Nr);
+    out.set(encrypted, i);
+    currentIv = encrypted;
+  }
+
+  return out;
+}
+
+function aesDecryptCbc(key, iv, data, usePadding = true) {
+  if (typeof key === 'string') key = new TextEncoder().encode(key);
+  if (typeof data === 'string') data = new TextEncoder().encode(data);
+  if (!(key instanceof Uint8Array)) key = new Uint8Array(key);
+  if (!(data instanceof Uint8Array)) data = new Uint8Array(data);
+  if (!(iv instanceof Uint8Array)) iv = new Uint8Array(iv);
+
+  if (data.length % 16 !== 0) {
+    throw new Error('Ciphertext length must be multiple of 16');
+  }
+
+  const { w, Nr } = expandKey(key);
+  const out = new Uint8Array(data.length);
+  let currentIv = new Uint8Array(iv.subarray(0, 16));
+
+  for (let i = 0; i < data.length; i += 16) {
+    const block = data.subarray(i, i + 16);
+    const decrypted = invCipherBlock(block, w, Nr);
+    for (let j = 0; j < 16; j++) {
+      out[i + j] = decrypted[j] ^ currentIv[j];
+    }
+    currentIv = block;
+  }
+
+  if (usePadding && out.length > 0) {
+    const padLen = out[out.length - 1];
+    if (padLen > 0 && padLen <= 16) {
+      let valid = true;
+      for (let j = out.length - padLen; j < out.length; j++) {
+        if (out[j] !== padLen) {
+          valid = false;
+          break;
+        }
+      }
+      if (valid) {
+        return out.subarray(0, out.length - padLen);
+      }
+    }
+  }
+
+  return out;
+}
+
+/* Module: core/pdf_ast.js */
+/**
+ * @file src/core/pdf_ast.js
+ * @description PDF Abstract Syntax Tree (AST) Data Structures & Object Model.
+ *              PDF 표준 구문 트리(AST) 자료구조 및 객체 모델.
+ */
+
+/**
+ * Represents an Indirect Reference in PDF (e.g. `3 0 R`).
+ * PDF 간접 객체 참조 (`3 0 R`) 모델.
+ */
+class PdfRef {
+  /**
+   * @param {number|string} num - Object Number / 객체 번호
+   * @param {number|string} [gen=0] - Generation Number / 세대 번호
+   */
+  constructor(num, gen = 0) {
+    this.num = Number(num);
+    this.gen = Number(gen);
+  }
+
+  toString() {
+    return `${this.num} ${this.gen} R`;
+  }
+}
+
+/**
+ * Represents a Binary/Literal or Hexadecimal String in PDF.
+ * PDF 바이너리/리터럴 또는 16진수 문자열 (`(Text)` 또는 `<48656C6C6F>`) 모델.
+ */
+class PdfString {
+  /**
+   * @param {Uint8Array|Array<number>|string} bytes - Raw string bytes / 원시 바이트
+   * @param {boolean} [isHex=false] - Whether to format as hex string / 16진수 문자열 포맷 여부
+   */
+  constructor(bytes, isHex = false) {
+    if (typeof bytes === 'string') {
+      this.bytes = new TextEncoder().encode(bytes);
+    } else if (bytes instanceof Uint8Array) {
+      this.bytes = bytes;
+    } else {
+      this.bytes = new Uint8Array(bytes);
+    }
+    this.isHex = isHex;
+  }
+
+  toString() {
+    if (this.isHex) {
+      let hex = '';
+      for (let i = 0; i < this.bytes.length; i++) {
+        hex += this.bytes[i].toString(16).padStart(2, '0');
+      }
+      return `<${hex}>`;
+    }
+
+    // Literal string with standard PDF escape sequences / 표준 이스케이프 문자열
+    let str = '';
+    for (let i = 0; i < this.bytes.length; i++) {
+      const b = this.bytes[i];
+      if (b === 0x28) str += '\\(';
+      else if (b === 0x29) str += '\\)';
+      else if (b === 0x5c) str += '\\\\';
+      else if (b === 0x0a) str += '\\n';
+      else if (b === 0x0d) str += '\\r';
+      else if (b === 0x09) str += '\\t';
+      else if (b >= 32 && b <= 126) str += String.fromCharCode(b);
+      else {
+        str += '\\' + b.toString(8).padStart(3, '0');
+      }
+    }
+    return `(${str})`;
+  }
+}
+
+/**
+ * Represents a PDF Dictionary (`<< /Key Value >>`).
+ * PDF 딕셔너리 (`<< /Key Value >>`) 모델.
+ */
+class PdfDict {
+  constructor() {
+    this.map = new Map(); // Key: '/Name', Value: any
+  }
+
+  /**
+   * Sets key-value pair. Ensures key starts with '/'.
+   * 키-값 쌍을 저장합니다. (키 앞 슬래시 자동 보정)
+   * @param {string} key
+   * @param {*} val
+   */
+  set(key, val) {
+    const k = key.startsWith('/') ? key : '/' + key;
+    this.map.set(k, val);
+  }
+
+  /**
+   * Retrieves value by key.
+   * 키에 해당하는 값을 반환합니다.
+   * @param {string} key
+   * @returns {*}
+   */
+  get(key) {
+    const k = key.startsWith('/') ? key : '/' + key;
+    return this.map.get(k);
+  }
+
+  /**
+   * Checks if dictionary has key.
+   * 키 존재 여부를 확인합니다.
+   * @param {string} key
+   * @returns {boolean}
+   */
+  has(key) {
+    const k = key.startsWith('/') ? key : '/' + key;
+    return this.map.has(k);
+  }
+
+  /**
+   * Deletes a key.
+   * 키를 삭제합니다.
+   * @param {string} key
+   * @returns {boolean}
+   */
+  delete(key) {
+    const k = key.startsWith('/') ? key : '/' + key;
+    return this.map.delete(k);
+  }
+
+  /**
+   * Returns iterator of [key, value] pairs.
+   * @returns {IterableIterator<[string, *]>}
+   */
+  entries() {
+    return this.map.entries();
+  }
+
+  /**
+   * Clones dictionary.
+   * @returns {PdfDict}
+   */
+  clone() {
+    const c = new PdfDict();
+    for (const [k, v] of this.map.entries()) {
+      c.set(k, v);
+    }
+    return c;
+  }
+}
+
+/**
+ * Represents a PDF Array (`[ ... ]`).
+ * PDF 배열 (`[ ... ]`) 모델.
+ */
+class PdfArray {
+  /**
+   * @param {Array} [items=[]]
+   */
+  constructor(items = []) {
+    this.items = items;
+  }
+
+  push(item) {
+    this.items.push(item);
+  }
+
+  get(index) {
+    return this.items[index];
+  }
+
+  get length() {
+    return this.items.length;
+  }
+
+  clone() {
+    return new PdfArray([...this.items]);
+  }
+}
+
+/**
+ * Represents a PDF Stream (`stream ... endstream`).
+ * PDF 스트림 데이터 (`stream ... endstream`) 모델.
+ */
+class PdfStream {
+  /**
+   * @param {PdfDict} dict - Stream metadata dictionary / 스트림 메타데이터 딕셔너리
+   * @param {Uint8Array} bytes - Raw stream bytes / 원시 스트림 바이트 배열
+   */
+  constructor(dict, bytes) {
+    this.dict = dict instanceof PdfDict ? dict : new PdfDict();
+    this.bytes = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  }
+}
+
+/**
+ * Represents an Indirect Object (`1 0 obj ... endobj`).
+ * PDF 간접 객체 (`1 0 obj ... endobj`) 모델.
+ */
+class PdfObject {
+  /**
+   * @param {number} num - Object Number / 객체 번호
+   * @param {number} gen - Generation Number / 세대 번호
+   * @param {*} data - AST Data (PdfDict, PdfArray, PdfString, number, etc.) / AST 데이터
+   * @param {PdfStream|null} [stream=null] - Stream if present / 스트림 데이터
+   */
+  constructor(num, gen, data, stream = null) {
+    this.num = Number(num);
+    this.gen = Number(gen);
+    this.data = data;
+    this.stream = stream;
+  }
+}
+
+/**
+ * Complete In-Memory Representation of a PDF Document.
+ * PDF 문서의 전체 메모리 모델.
+ */
+class PdfDocument {
+  /**
+   * @param {Uint8Array} bytes - Source file binary bytes / 소스 파일 바이너리
+   */
+  constructor(bytes) {
+    this.bytes = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+    this.headerVersion = '1.7';
+    this.trailer = new PdfDict();
+    this.encryptRef = null;
+    this.objects = new Map(); // Key: `${num}_${gen}`, Value: PdfObject
+  }
+
+  /**
+   * Retrieves an object by object number and generation.
+   * 객체 번호와 세대 번호로 객체를 조회합니다.
+   * @param {number} num
+   * @param {number} [gen=0]
+   * @returns {PdfObject|undefined}
+   */
+  getObject(num, gen = 0) {
+    return this.objects.get(`${num}_${gen}`);
+  }
+
+  /**
+   * Sets or updates an indirect object in document.
+   * 간접 객체를 등록 또는 업데이트합니다.
+   * @param {number} num
+   * @param {number} gen
+   * @param {*} data
+   * @param {PdfStream|null} [stream=null]
+   * @returns {PdfObject}
+   */
+  setObject(num, gen, data, stream = null) {
+    const obj = new PdfObject(num, gen, data, stream);
+    this.objects.set(`${num}_${gen}`, obj);
+    return obj;
+  }
+
+  /**
+   * Deletes an object by number.
+   * 객체를 삭제합니다.
+   * @param {number} num
+   * @param {number} [gen=0]
+   */
+  deleteObject(num, gen = 0) {
+    this.objects.delete(`${num}_${gen}`);
+  }
+}
+
+/* Module: core/pdf_parser.js */
+/**
+ * @file src/core/pdf_parser.js
+ * @description High-performance Binary PDF Lexer, Tokenizer, and AST Parser.
+ *              고성능 바이너리 PDF 렉서, 토크나이저 및 AST 파서.
+ */
+
+
+
+/**
+ * Binary-safe Lexer and Tokenizer for PDF byte streams.
+ * 바이너리 데이터와 텍스트가 혼합된 PDF 바이트 스트림을 안전하게 파싱하는 렉서.
+ */
+class PdfLexer {
+  /**
+   * @param {Uint8Array} bytes - PDF file byte array / PDF 바이트 배열
+   */
+  constructor(bytes) {
+    this.bytes = bytes;
+    this.pos = 0;
+    this.length = bytes.length;
+  }
+
+  /**
+   * Returns true if character byte is PDF whitespace (NUL, TAB, LF, FF, CR, SP).
+   * 공백 문자 여부를 검사합니다.
+   */
+  isWhitespace(b) {
+    return b === 0x00 || b === 0x09 || b === 0x0a || b === 0x0c || b === 0x0d || b === 0x20;
+  }
+
+  /**
+   * Returns true if character byte is a PDF delimiter.
+   * 구분자 문자 여부를 검사합니다.
+   */
+  isDelimiter(b) {
+    return b === 0x28 || b === 0x29 || // ( )
+           b === 0x3c || b === 0x3e || // < >
+           b === 0x5b || b === 0x5d || // [ ]
+           b === 0x7b || b === 0x7d || // { }
+           b === 0x2f || b === 0x25;   // / %
+  }
+
+  /**
+   * Skips all whitespaces and comments (% ... \r|\n).
+   * 공백 및 주석 라인을 건너뜁니다.
+   */
+  skipWhitespaceAndComments() {
+    while (this.pos < this.length) {
+      const b = this.bytes[this.pos];
+      if (this.isWhitespace(b)) {
+        this.pos++;
+      } else if (b === 0x25) { // '%' Comment
+        while (this.pos < this.length && this.bytes[this.pos] !== 0x0a && this.bytes[this.pos] !== 0x0d) {
+          this.pos++;
+        }
+      } else {
+        break;
+      }
+    }
+  }
+
+  /**
+   * Reads next token as a string.
+   * 다음 토큰을 문자열로 읽어옵니다.
+   */
+  nextToken() {
+    this.skipWhitespaceAndComments();
+    if (this.pos >= this.length) return null;
+
+    const b = this.bytes[this.pos];
+
+    // Check dictionary start '<<' or end '>>'
+    if (b === 0x3c && this.pos + 1 < this.length && this.bytes[this.pos + 1] === 0x3c) { // '<<'
+      this.pos += 2;
+      return '<<';
+    }
+    if (b === 0x3e && this.pos + 1 < this.length && this.bytes[this.pos + 1] === 0x3e) { // '>>'
+      this.pos += 2;
+      return '>>';
+    }
+
+    // Name token `/Name`
+    if (b === 0x2f) { // '/'
+      const start = this.pos;
+      this.pos++;
+      while (this.pos < this.length) {
+        const cur = this.bytes[this.pos];
+        if (this.isWhitespace(cur) || this.isDelimiter(cur)) break;
+        this.pos++;
+      }
+      return new TextDecoder('latin1').decode(this.bytes.subarray(start, this.pos));
+    }
+
+    // Single character delimiters `(`, `)`, `[`, `]`, `<`, `>`
+    if (this.isDelimiter(b)) {
+      this.pos++;
+      return String.fromCharCode(b);
+    }
+
+    // Regular token (keywords, numbers, booleans)
+    const start = this.pos;
+    while (this.pos < this.length) {
+      const cur = this.bytes[this.pos];
+      if (this.isWhitespace(cur) || this.isDelimiter(cur)) break;
+      this.pos++;
+    }
+
+    return new TextDecoder('latin1').decode(this.bytes.subarray(start, this.pos));
+  }
+
+  /**
+   * Parses literal string `(...)` supporting escape sequences and nested parens.
+   * 이스케이프 및 중첩 괄호를 지원하는 리터럴 문자열을 파싱합니다.
+   */
+  parseLiteralString() {
+    const bytes = [];
+    let depth = 1;
+
+    while (this.pos < this.length && depth > 0) {
+      const b = this.bytes[this.pos++];
+      if (b === 0x5c) { // Backslash '\'
+        if (this.pos >= this.length) break;
+        const next = this.bytes[this.pos++];
+        if (next === 0x6e) bytes.push(0x0a); // \n
+        else if (next === 0x72) bytes.push(0x0d); // \r
+        else if (next === 0x74) bytes.push(0x09); // \t
+        else if (next === 0x62) bytes.push(0x08); // \b
+        else if (next === 0x66) bytes.push(0x0c); // \f
+        else if (next === 0x28) bytes.push(0x28); // \(
+        else if (next === 0x29) bytes.push(0x29); // \)
+        else if (next === 0x5c) bytes.push(0x5c); // \\
+        else if (next >= 0x30 && next <= 0x37) { // Octal \ddd
+          let octal = String.fromCharCode(next);
+          for (let k = 0; k < 2; k++) {
+            if (this.pos < this.length && this.bytes[this.pos] >= 0x30 && this.bytes[this.pos] <= 0x37) {
+              octal += String.fromCharCode(this.bytes[this.pos++]);
+            } else {
+              break;
+            }
+          }
+          bytes.push(parseInt(octal, 8));
+        } else if (next === 0x0d) { // \<EOL> line continuation
+          if (this.pos < this.length && this.bytes[this.pos] === 0x0a) this.pos++;
+        } else if (next === 0x0a) {
+          // ignore newline
+        } else {
+          bytes.push(next);
+        }
+      } else if (b === 0x28) { // '('
+        depth++;
+        bytes.push(b);
+      } else if (b === 0x29) { // ')'
+        depth--;
+        if (depth > 0) bytes.push(b);
+      } else {
+        bytes.push(b);
+      }
+    }
+    return new PdfString(new Uint8Array(bytes), false);
+  }
+
+  /**
+   * Parses hexadecimal string `< ... >`.
+   * 16진수 문자열 `< ... >`을 파싱합니다.
+   */
+  parseHexString() {
+    let hexStr = '';
+    while (this.pos < this.length) {
+      const b = this.bytes[this.pos++];
+      if (b === 0x3e) break; // '>'
+      if (!this.isWhitespace(b)) {
+        hexStr += String.fromCharCode(b);
+      }
+    }
+    if (hexStr.length % 2 !== 0) {
+      hexStr += '0';
+    }
+    const byteLen = hexStr.length / 2;
+    const out = new Uint8Array(byteLen);
+    for (let i = 0; i < byteLen; i++) {
+      out[i] = parseInt(hexStr.substr(i * 2, 2), 16);
+    }
+    return new PdfString(out, true);
+  }
+
+  /**
+   * Parses PDF dictionary `<< ... >>`.
+   * PDF 딕셔너리 `<< ... >>`을 파싱합니다.
+   */
+  parseDict() {
+    const dict = new PdfDict();
+    while (this.pos < this.length) {
+      this.skipWhitespaceAndComments();
+      if (this.bytes[this.pos] === 0x3e && this.pos + 1 < this.length && this.bytes[this.pos + 1] === 0x3e) {
+        this.pos += 2; // '>>'
+        break;
+      }
+      const keyToken = this.nextToken();
+      if (!keyToken || keyToken === '>>') break;
+      if (!keyToken.startsWith('/')) continue;
+
+      const value = this.parseObjectValue();
+      dict.set(keyToken, value);
+    }
+    return dict;
+  }
+
+  /**
+   * Parses array `[ ... ]`.
+   * 배열 `[ ... ]`을 재귀적으로 파싱합니다.
+   */
+  parseArray() {
+    const arr = new PdfArray();
+    while (this.pos < this.length) {
+      this.skipWhitespaceAndComments();
+      if (this.bytes[this.pos] === 0x5d) { // ']'
+        this.pos++;
+        break;
+      }
+      const val = this.parseObjectValue();
+      if (val === ']' || (val === null && this.bytes[this.pos - 1] === 0x5d)) break;
+      arr.push(val);
+    }
+    return arr;
+  }
+
+  /**
+   * Parses any generic PDF object value.
+   * 임의의 PDF 구문 객체 값을 파싱합니다.
+   */
+  parseObjectValue() {
+    this.skipWhitespaceAndComments();
+    if (this.pos >= this.length) return null;
+
+    const b = this.bytes[this.pos];
+
+    if (b === 0x28) { // '(' Literal string
+      this.pos++;
+      return this.parseLiteralString();
+    }
+    if (b === 0x3c) { // '<' Hex string or '<<' Dict
+      if (this.pos + 1 < this.length && this.bytes[this.pos + 1] === 0x3c) {
+        this.pos += 2;
+        return this.parseDict();
+      }
+      this.pos++;
+      return this.parseHexString();
+    }
+    if (b === 0x5b) { // '[' Array
+      this.pos++;
+      return this.parseArray();
+    }
+    if (b === 0x5d) { // ']' End of array
+      this.pos++;
+      return ']';
+    }
+
+    const token = this.nextToken();
+    if (token === null) return null;
+
+    if (token === 'true') return true;
+    if (token === 'false') return false;
+    if (token === 'null') return null;
+    if (token.startsWith('/')) return token;
+
+    // Number or Indirect Reference `num gen R`
+    if (/^[+-]?\d+$/.test(token)) {
+      const savedPos = this.pos;
+      this.skipWhitespaceAndComments();
+      const secondToken = this.nextToken();
+      if (secondToken !== null && /^\d+$/.test(secondToken)) {
+        this.skipWhitespaceAndComments();
+        const thirdToken = this.nextToken();
+        if (thirdToken === 'R') {
+          return new PdfRef(parseInt(token, 10), parseInt(secondToken, 10));
+        }
+      }
+      // Revert if not an indirect reference `num gen R`
+      this.pos = savedPos;
+      return parseInt(token, 10);
+    }
+
+    // Floating point number
+    if (/^[+-]?\d*\.\d+$/.test(token)) {
+      return parseFloat(token);
+    }
+
+    return token;
+  }
+
+  /**
+   * Parses a stream content according to dictionary /Length or endstream marker.
+   * 스트림 데이터를 파싱합니다.
+   */
+  parseStream(dict) {
+    if (this.bytes[this.pos] === 0x0d && this.pos + 1 < this.length && this.bytes[this.pos + 1] === 0x0a) {
+      this.pos += 2;
+    } else if (this.bytes[this.pos] === 0x0a || this.bytes[this.pos] === 0x0d) {
+      this.pos++;
+    }
+
+    let length = dict.get('/Length');
+    let streamBytes;
+
+    if (typeof length === 'number' && length >= 0 && this.pos + length <= this.length) {
+      streamBytes = this.bytes.slice(this.pos, this.pos + length);
+      this.pos += length;
+      this.skipWhitespaceAndComments();
+      const endToken = this.nextToken();
+      if (endToken !== 'endstream') {
+        this.pos -= length;
+        streamBytes = this.scanUntilEndstream();
+      }
+    } else {
+      streamBytes = this.scanUntilEndstream();
+    }
+
+    return new PdfStream(dict, streamBytes);
+  }
+
+  /**
+   * Scans binary stream until `endstream` keyword is found.
+   * `endstream` 키워드를 만날 때까지 바이너리 데이터를 안전하게 슬라이스합니다.
+   */
+  scanUntilEndstream() {
+    const start = this.pos;
+    const endstreamMarker = new Uint8Array([0x65, 0x6e, 0x64, 0x73, 0x74, 0x72, 0x65, 0x61, 0x6d]); // 'endstream'
+    let found = -1;
+
+    for (let i = this.pos; i <= this.length - 9; i++) {
+      let match = true;
+      for (let j = 0; j < 9; j++) {
+        if (this.bytes[i + j] !== endstreamMarker[j]) {
+          match = false;
+          break;
+        }
+      }
+      if (match) {
+        found = i;
+        break;
+      }
+    }
+
+    if (found === -1) {
+      found = this.length;
+    }
+
+    let end = found;
+    if (end > start && this.bytes[end - 1] === 0x0a) end--;
+    if (end > start && this.bytes[end - 1] === 0x0d) end--;
+
+    const streamBytes = this.bytes.slice(start, end);
+    this.pos = found + 9;
+    return streamBytes;
+  }
+}
+
+/**
+ * Parses a PDF binary buffer into a structured PdfDocument AST model.
+ * PDF 바이너리 버퍼를 구조화된 PdfDocument AST 모델로 파싱합니다.
+ * @param {Uint8Array|ArrayBuffer} buffer - PDF file bytes / PDF 파일 바이트 배열
+ * @returns {PdfDocument}
+ */
+function parsePdf(buffer) {
+  const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+  const doc = new PdfDocument(bytes);
+
+  // 1. Parse Header Version / PDF 버전 파싱
+  const headerStr = new TextDecoder('latin1').decode(bytes.subarray(0, 32));
+  const versionMatch = headerStr.match(/%PDF-(\d+\.\d+)/);
+  if (versionMatch) {
+    doc.headerVersion = versionMatch[1];
+  }
+
+  // 2. Scan and parse all Indirect Objects (`num gen obj ... endobj`)
+  // 모든 간접 객체 스캔 및 파싱
+  const text = new TextDecoder('latin1').decode(bytes);
+  const objRegex = /(\d+)\s+(\d+)\s+obj/g;
+  let match;
+
+  while ((match = objRegex.exec(text)) !== null) {
+    const objNum = parseInt(match[1], 10);
+    const genNum = parseInt(match[2], 10);
+    const objStartPos = match.index + match[0].length;
+
+    const lexer = new PdfLexer(bytes);
+    lexer.pos = objStartPos;
+
+    const data = lexer.parseObjectValue();
+    let stream = null;
+
+    lexer.skipWhitespaceAndComments();
+    const token = lexer.nextToken();
+    if (token === 'stream' && data instanceof PdfDict) {
+      stream = lexer.parseStream(data);
+    }
+
+    doc.setObject(objNum, genNum, data, stream);
+  }
+
+  // 3. Scan and extract Trailer Dictionary (`trailer << ... >>`)
+  // 트레일러 딕셔너리 스캔 및 추출
+  const trailerIdx = text.lastIndexOf('trailer');
+  if (trailerIdx !== -1) {
+    const trailerLexer = new PdfLexer(bytes);
+    trailerLexer.pos = trailerIdx + 7;
+    const trailerDict = trailerLexer.parseObjectValue();
+    if (trailerDict instanceof PdfDict) {
+      doc.trailer = trailerDict;
+      const enc = trailerDict.get('/Encrypt');
+      if (enc instanceof PdfRef) {
+        doc.encryptRef = enc;
+      }
+    }
+  }
+
+  // 3-B. Scan for modern PDF 1.5+ Cross-Reference Streams (`/Type /XRef`)
+  for (const obj of doc.objects.values()) {
+    if (obj.data instanceof PdfDict && obj.data.get('/Type') === '/XRef') {
+      for (const [k, v] of obj.data.map.entries()) {
+        if (!doc.trailer.has(k)) {
+          doc.trailer.set(k, v);
+        }
+      }
+      if (!doc.encryptRef && obj.data.has('/Encrypt')) {
+        const enc = obj.data.get('/Encrypt');
+        if (enc instanceof PdfRef) {
+          doc.encryptRef = enc;
+        }
+      }
+    }
+  }
+
+  // 3-C. Fallback check for Standard Encryption Dictionary object (/Filter /Standard, /V 1..5, has /U and /O)
+  if (!doc.encryptRef) {
+    for (const obj of doc.objects.values()) {
+      if (obj.data instanceof PdfDict) {
+        const filter = obj.data.get('/Filter');
+        const v = obj.data.get('/V');
+        if (typeof filter === 'string' && (filter === '/Standard' || filter.startsWith('/Adobe')) &&
+            typeof v === 'number' && obj.data.has('/U') && obj.data.has('/O')) {
+          doc.encryptRef = new PdfRef(obj.num, obj.gen);
+          if (!doc.trailer.has('/Encrypt')) {
+            doc.trailer.set('/Encrypt', doc.encryptRef);
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  return doc;
+}
+
+/* Module: core/pdf_security.js */
+/**
+ * @file src/core/pdf_security.js
+ * @description Standard Security Handler (ISO 32000-1 / ISO 32000-2 R2~R6), Permission Bitmask Engine,
+ *              and Lossless PDF Cryptographic Processing.
+ *              ISO 32000-1 및 ISO 32000-2 표준 보안 핸들러 (R2~R6), 세부 권한 비트마스크 연산 및 무손실 암복호화 엔진.
+ */
+
+
+
+
+// Standard 32-byte padding specified in ISO 32000-1 Table 23
+const STANDARD_ENCRYPT_PADDING = new Uint8Array([
+  0x28, 0xBF, 0x4E, 0x5E, 0x4E, 0x75, 0x8A, 0x41, 0x64, 0x00, 0x4E, 0x56, 0xFF, 0xFA, 0x01, 0x08,
+  0x2E, 0x2E, 0x00, 0xB6, 0xD0, 0x68, 0x3E, 0x80, 0x2F, 0x0C, 0xA9, 0xFE, 0x64, 0x53, 0x69, 0x7A
+]);
+
+/**
+ * Parses 32-bit permission integer `P` into granular permission flags (ISO 32000-1 Table 22).
+ * PDF 32비트 권한 정수(P)를 세부 권한 플래그 객체로 파싱합니다.
+ * @param {number} p - 32-bit permission integer / 32비트 권한 정수
+ * @returns {Object}
+ */
+function parsePermissions(p) {
+  const uP = p >>> 0;
+  return {
+    canPrint: (uP & 4) !== 0,
+    canModify: (uP & 8) !== 0,
+    canCopy: (uP & 16) !== 0,
+    canAnnotate: (uP & 32) !== 0,
+    canFillForms: (uP & 256) !== 0,
+    canExtractAccessibility: (uP & 512) !== 0,
+    canAssemble: (uP & 1024) !== 0,
+    canPrintHighQuality: (uP & 2048) !== 0
+  };
+}
+
+/**
+ * Builds 32-bit two's complement permission integer `P` from granular permission flags.
+ * 세부 권한 플래그 객체를 ISO 32000-1 표준 32비트 권한 정수(P)로 조합합니다.
+ * @param {Object} perms - Granular permission flags / 세부 권한 설정
+ * @returns {number}
+ */
+function buildPermissions(perms = {}) {
+  let mask = 0xFFFFF0C0; // ISO 32000-1 Reserved Bits (7-8, 13-32 must be 1)
+
+  if (perms.canPrint) mask |= 4;
+  if (perms.canModify) mask |= 8;
+  if (perms.canCopy) mask |= 16;
+  if (perms.canAnnotate) mask |= 32;
+  if (perms.canFillForms) mask |= 256;
+  if (perms.canExtractAccessibility) mask |= 512;
+  if (perms.canAssemble) mask |= 1024;
+  if (perms.canPrintHighQuality) mask |= 2048;
+
+  return (mask | 0) - 0x100000000;
+}
+
+/**
+ * Pads or truncates password to 32 bytes for R2..R4 MD5 hashing.
+ * R2..R4 암호화 해싱을 위해 비밀번호를 32바이트로 패딩하거나 자릅니다.
+ */
+function padOrTruncatePassword(password) {
+  const bytes = typeof password === 'string' ? new TextEncoder().encode(password) : password;
+  const out = new Uint8Array(32);
+  const copyLen = Math.min(bytes.length, 32);
+  out.set(bytes.subarray(0, copyLen), 0);
+  if (copyLen < 32) {
+    out.set(STANDARD_ENCRYPT_PADDING.subarray(0, 32 - copyLen), copyLen);
+  }
+  return out;
+}
+
+/**
+ * Checks if provided password is the Owner password in Revision 5 or 6 (AES-256).
+ * Revision 5/6 (AES-256)에서 입력한 암호가 Owner 암호인지 검증합니다.
+ */
+function isOwnerPassword56(passwordBytes, oBytes, uBytes, r) {
+  if (!oBytes || oBytes.length < 40) return false;
+  const oHash = oBytes.subarray(0, 32);
+  const oValidationSalt = oBytes.subarray(32, 40);
+
+  let hash;
+  if (r === 5) {
+    const input = new Uint8Array(passwordBytes.length + oValidationSalt.length + uBytes.length);
+    input.set(passwordBytes, 0);
+    input.set(oValidationSalt, passwordBytes.length);
+    input.set(uBytes, passwordBytes.length + oValidationSalt.length);
+    hash = sha256(input);
+  } else {
+    hash = computeHash2A(passwordBytes, oValidationSalt, uBytes);
+  }
+
+  if (hash.length !== oHash.length) return false;
+  for (let i = 0; i < 32; i++) {
+    if (hash[i] !== oHash[i]) return false;
+  }
+  return true;
+}
+
+/**
+ * Checks if provided password is the User password in Revision 5 or 6 (AES-256).
+ * Revision 5/6 (AES-256)에서 입력한 암호가 User 암호인지 검증합니다.
+ */
+function isUserPassword56(passwordBytes, uBytes, r) {
+  if (!uBytes || uBytes.length < 40) return false;
+  const uHash = uBytes.subarray(0, 32);
+  const uValidationSalt = uBytes.subarray(32, 40);
+
+  let hash;
+  if (r === 5) {
+    const input = new Uint8Array(passwordBytes.length + uValidationSalt.length);
+    input.set(passwordBytes, 0);
+    input.set(uValidationSalt, passwordBytes.length);
+    hash = sha256(input);
+  } else {
+    hash = computeHash2A(passwordBytes, uValidationSalt, null);
+  }
+
+  if (hash.length !== uHash.length) return false;
+  for (let i = 0; i < 32; i++) {
+    if (hash[i] !== uHash[i]) return false;
+  }
+  return true;
+}
+
+/**
+ * Computes raw unverified FEK for R2..R4 (ISO 32000-1 Algorithm 3.2).
+ */
+function computeRawFek234(encDict, passwordBytes, docIdBytes) {
+  const r = encDict.get('/R') || 2;
+  const lengthBits = encDict.get('/Length') || 40;
+  const keyLength = lengthBits / 8;
+  const pVal = encDict.get('/P') || 0;
+  const encryptMetadata = encDict.has('/EncryptMetadata') ? encDict.get('/EncryptMetadata') !== false : true;
+
+  const oObj = encDict.get('/O');
+  const oBytes = oObj instanceof PdfString ? oObj.bytes : new Uint8Array(0);
+
+  const passPadded = padOrTruncatePassword(passwordBytes);
+
+  let uP = pVal >>> 0;
+  const pBytes = new Uint8Array([
+    uP & 0xff,
+    (uP >>> 8) & 0xff,
+    (uP >>> 16) & 0xff,
+    (uP >>> 24) & 0xff
+  ]);
+
+  let totalLen = passPadded.length + oBytes.length + 4 + docIdBytes.length;
+  if (r >= 4 && !encryptMetadata) totalLen += 4;
+
+  const data = new Uint8Array(totalLen);
+  let pos = 0;
+  data.set(passPadded, pos); pos += passPadded.length;
+  data.set(oBytes, pos); pos += oBytes.length;
+  data.set(pBytes, pos); pos += 4;
+  data.set(docIdBytes, pos); pos += docIdBytes.length;
+
+  if (r >= 4 && !encryptMetadata) {
+    data.set([0xff, 0xff, 0xff, 0xff], pos);
+  }
+
+  let hash = md5(data);
+
+  if (r >= 3) {
+    for (let i = 0; i < 50; i++) {
+      hash = md5(hash.subarray(0, keyLength));
+    }
+  }
+
+  return hash.subarray(0, keyLength);
+}
+
+/**
+ * Computes File Encryption Key (FEK) according to ISO 32000-1 Algorithm 3.2 or ISO 32000-2 Algorithm 2.A.
+ * ISO 32000 표준에 따라 파일 암호화 키(FEK)를 유도하고 유효성을 검증합니다.
+ */
+function computeFileEncryptionKey(encDict, password = '', docIdBytes = new Uint8Array(0)) {
+  const r = encDict.get('/R') || 2;
+  const lengthBits = encDict.get('/Length') || 40;
+  const keyLength = lengthBits / 8;
+
+  const oObj = encDict.get('/O');
+  const uObj = encDict.get('/U');
+  const oeObj = encDict.get('/OE');
+  const ueObj = encDict.get('/UE');
+
+  const oBytes = oObj instanceof PdfString ? oObj.bytes : new Uint8Array(0);
+  const uBytes = uObj instanceof PdfString ? uObj.bytes : new Uint8Array(0);
+  const oeBytes = oeObj instanceof PdfString ? oeObj.bytes : new Uint8Array(0);
+  const ueBytes = ueObj instanceof PdfString ? ueObj.bytes : new Uint8Array(0);
+
+  const passwordBytes = typeof password === 'string' ? new TextEncoder().encode(password) : password;
+
+  // Handle Revision 5 and Revision 6 (AES-256)
+  if (r === 5 || r === 6) {
+    // 1. Try Owner Password
+    if (isOwnerPassword56(passwordBytes, oBytes, uBytes, r) && oeBytes.length >= 32) {
+      const oKeySalt = oBytes.subarray(40, 48);
+      let hashOE;
+      if (r === 5) {
+        const input = new Uint8Array(passwordBytes.length + oKeySalt.length + uBytes.length);
+        input.set(passwordBytes, 0);
+        input.set(oKeySalt, passwordBytes.length);
+        input.set(uBytes, passwordBytes.length + oKeySalt.length);
+        hashOE = sha256(input);
+      } else {
+        hashOE = computeHash2A(passwordBytes, oKeySalt, uBytes);
+      }
+      return aesDecryptCbc(hashOE, new Uint8Array(16), oeBytes.subarray(0, 32), false);
+    }
+
+    // 2. Try User Password (or empty password)
+    if (isUserPassword56(passwordBytes, uBytes, r) && ueBytes.length >= 32) {
+      const uKeySalt = uBytes.subarray(40, 48);
+      let hashUE;
+      if (r === 5) {
+        const input = new Uint8Array(passwordBytes.length + uKeySalt.length);
+        input.set(passwordBytes, 0);
+        input.set(uKeySalt, passwordBytes.length);
+        hashUE = sha256(input);
+      } else {
+        hashUE = computeHash2A(passwordBytes, uKeySalt, null);
+      }
+      return aesDecryptCbc(hashUE, new Uint8Array(16), ueBytes.subarray(0, 32), false);
+    }
+
+    // 3. Fallback: if password is not empty, also try authenticating with empty string
+    if (passwordBytes.length > 0) {
+      const emptyPw = new Uint8Array(0);
+      if (isUserPassword56(emptyPw, uBytes, r) && ueBytes.length >= 32) {
+        const uKeySalt = uBytes.subarray(40, 48);
+        const hashUE = r === 5 ? sha256(uKeySalt) : computeHash2A(emptyPw, uKeySalt, null);
+        return aesDecryptCbc(hashUE, new Uint8Array(16), ueBytes.subarray(0, 32), false);
+      }
+    }
+
+    return null; // Password required or invalid
+  }
+
+  // Handle Revision 2, 3, 4 (RC4 / AES-128) with authentication
+  const fekUser = computeRawFek234(encDict, passwordBytes, docIdBytes);
+
+  // Check if User Password is valid
+  if (uBytes.length >= 16) {
+    if (r === 2) {
+      const testU = rc4(fekUser, STANDARD_ENCRYPT_PADDING);
+      let match = true;
+      for (let i = 0; i < 32 && i < uBytes.length; i++) {
+        if (testU[i] !== uBytes[i]) { match = false; break; }
+      }
+      if (match) return fekUser;
+    } else {
+      const testU = computeUserPasswordHash(fekUser, r, docIdBytes);
+      let match = true;
+      for (let i = 0; i < 16 && i < uBytes.length; i++) {
+        if (testU[i] !== uBytes[i]) { match = false; break; }
+      }
+      if (match) return fekUser;
+    }
+  }
+
+  // Check if Owner Password is valid (Algorithm 3.7)
+  if (oBytes.length >= 32) {
+    const ownerPadded = padOrTruncatePassword(passwordBytes);
+    let hash = md5(ownerPadded);
+    if (r >= 3) {
+      for (let i = 0; i < 50; i++) hash = md5(hash.subarray(0, keyLength));
+    }
+    let recoveredUserPass = rc4(hash.subarray(0, keyLength), oBytes.subarray(0, 32));
+    if (r >= 3) {
+      for (let i = 19; i >= 1; i--) {
+        const iterKey = new Uint8Array(keyLength);
+        for (let j = 0; j < keyLength; j++) iterKey[j] = hash[j] ^ i;
+        recoveredUserPass = rc4(iterKey, recoveredUserPass);
+      }
+    }
+    const fekOwner = computeRawFek234(encDict, recoveredUserPass, docIdBytes);
+    const testU = computeUserPasswordHash(fekOwner, r, docIdBytes);
+    let match = true;
+    for (let i = 0; i < (r === 2 ? 32 : 16) && i < uBytes.length; i++) {
+      if (testU[i] !== uBytes[i]) { match = false; break; }
+    }
+    if (match) return fekOwner;
+  }
+
+  // Fallback: If password was empty but file had no /U (corrupted header)
+  if (passwordBytes.length === 0 && uBytes.length === 0) {
+    return fekUser;
+  }
+
+  return null;
+}
+
+/**
+ * Computes object-specific derivative key (ISO 32000-1 Algorithm 3.1).
+ * 객체별 파생 암호화 키를 계산합니다.
+ */
+function computeObjectKey(fek, objNum, genNum, isAes = false) {
+  const data = new Uint8Array(fek.length + 5 + (isAes ? 4 : 0));
+  data.set(fek, 0);
+  data[fek.length] = objNum & 0xff;
+  data[fek.length + 1] = (objNum >>> 8) & 0xff;
+  data[fek.length + 2] = (objNum >>> 16) & 0xff;
+  data[fek.length + 3] = genNum & 0xff;
+  data[fek.length + 4] = (genNum >>> 8) & 0xff;
+
+  if (isAes) {
+    data[fek.length + 5] = 0x73; // 's'
+    data[fek.length + 6] = 0x41; // 'A'
+    data[fek.length + 7] = 0x6c; // 'l'
+    data[fek.length + 8] = 0x54; // 'T'
+  }
+
+  const hash = md5(data);
+  const keyLen = Math.min(fek.length + 5, 16);
+  return hash.subarray(0, keyLen);
+}
+
+/**
+ * Computes Owner Password Hash `/O` (ISO 32000-1 Algorithm 3.3).
+ */
+function computeOwnerPasswordHash(ownerPassword, userPassword, r, keyLength) {
+  const ownerPadded = padOrTruncatePassword(ownerPassword);
+  let hash = md5(ownerPadded);
+
+  if (r >= 3) {
+    for (let i = 0; i < 50; i++) {
+      hash = md5(hash.subarray(0, keyLength));
+    }
+  }
+
+  const rc4Key = hash.subarray(0, keyLength);
+  const userPadded = padOrTruncatePassword(userPassword);
+  let result = rc4(rc4Key, userPadded);
+
+  if (r >= 3) {
+    for (let i = 1; i <= 19; i++) {
+      const iterKey = new Uint8Array(keyLength);
+      for (let j = 0; j < keyLength; j++) {
+        iterKey[j] = rc4Key[j] ^ i;
+      }
+      result = rc4(iterKey, result);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Computes User Password Hash `/U` (ISO 32000-1 Algorithm 3.4 & 3.5).
+ */
+function computeUserPasswordHash(fek, r, docIdBytes) {
+  if (r === 2) {
+    return rc4(fek, STANDARD_ENCRYPT_PADDING);
+  }
+
+  const totalLen = STANDARD_ENCRYPT_PADDING.length + docIdBytes.length;
+  const data = new Uint8Array(totalLen);
+  data.set(STANDARD_ENCRYPT_PADDING, 0);
+  data.set(docIdBytes, STANDARD_ENCRYPT_PADDING.length);
+
+  let hash = md5(data);
+  let result = rc4(fek, hash);
+
+  for (let i = 1; i <= 19; i++) {
+    const iterKey = new Uint8Array(fek.length);
+    for (let j = 0; j < fek.length; j++) {
+      iterKey[j] = fek[j] ^ i;
+    }
+    result = rc4(iterKey, result);
+  }
+
+  const uValue = new Uint8Array(32);
+  uValue.set(result, 0);
+  uValue.set(STANDARD_ENCRYPT_PADDING.subarray(0, 16), 16);
+  return uValue;
+}
+
+/**
+ * Analyzes the security status and granular permissions of a PdfDocument.
+ * PDF 문서의 보안 상태, 암호화 알고리즘, 세부 권한을 종합 분석합니다.
+ * @param {PdfDocument} doc - Target PDF Document AST / 대상 PDF AST
+ * @returns {Object}
+ */
+function analyzeSecurity(doc) {
+  if (!doc.encryptRef) {
+    return {
+      isEncrypted: false,
+      requiresPassword: false,
+      permissions: parsePermissions(-4),
+      pVal: -4,
+      v: 0,
+      r: 0,
+      filter: null
+    };
+  }
+
+  const encObj = doc.getObject(doc.encryptRef.num, doc.encryptRef.gen);
+  if (!encObj || !(encObj.data instanceof PdfDict)) {
+    return { isEncrypted: false, requiresPassword: false, permissions: parsePermissions(-4) };
+  }
+
+  const encDict = encObj.data;
+  const pVal = encDict.get('/P') || -4;
+  const v = encDict.get('/V') || 1;
+  const r = encDict.get('/R') || 2;
+  const filter = encDict.get('/Filter');
+  const lengthBits = encDict.get('/Length') || (v === 1 ? 40 : 128);
+
+  const permissions = parsePermissions(pVal);
+
+  // Extract Document ID if available
+  let docIdBytes = new Uint8Array(0);
+  const idArray = doc.trailer.get('/ID');
+  if (idArray instanceof PdfArray && idArray.length > 0) {
+    const firstId = idArray.get(0);
+    if (firstId instanceof PdfString) docIdBytes = firstId.bytes;
+  }
+
+  // Check if openable with empty password
+  const fek = computeFileEncryptionKey(encDict, '', docIdBytes);
+  const requiresPassword = (fek === null);
+
+  return {
+    isEncrypted: true,
+    requiresPassword,
+    permissions,
+    pVal,
+    v,
+    r,
+    filter,
+    keyLength: lengthBits / 8
+  };
+}
+
+/**
+ * Decrypts a single PdfString AST object.
+ */
+function decryptString(strObj, fek, objNum, genNum, v, r) {
+  try {
+    if (v === 5 || r >= 5) {
+      if (strObj.bytes.length <= 16) return strObj.bytes;
+      const iv = strObj.bytes.subarray(0, 16);
+      const cipherText = strObj.bytes.subarray(16);
+      if (cipherText.length % 16 !== 0) return strObj.bytes;
+      return aesDecryptCbc(fek, iv, cipherText, true);
+    } else if (v === 4) {
+      const objKey = computeObjectKey(fek, objNum, genNum, true);
+      if (strObj.bytes.length <= 16) return strObj.bytes;
+      const iv = strObj.bytes.subarray(0, 16);
+      const cipherText = strObj.bytes.subarray(16);
+      if (cipherText.length % 16 !== 0) return strObj.bytes;
+      return aesDecryptCbc(objKey, iv, cipherText, true);
+    } else {
+      const objKey = computeObjectKey(fek, objNum, genNum, false);
+      return rc4(objKey, strObj.bytes);
+    }
+  } catch (err) {
+    return strObj.bytes;
+  }
+}
+
+/**
+ * Decrypts a single PdfStream AST object.
+ */
+function decryptStream(streamObj, fek, objNum, genNum, v, r) {
+  if (streamObj.dict && streamObj.dict.get('/Type') === '/XRef') {
+    return streamObj.bytes; // XRef streams are never encrypted
+  }
+  try {
+    if (v === 5 || r >= 5) {
+      if (streamObj.bytes.length <= 16) return streamObj.bytes;
+      const iv = streamObj.bytes.subarray(0, 16);
+      const cipherText = streamObj.bytes.subarray(16);
+      if (cipherText.length % 16 !== 0) return streamObj.bytes;
+      return aesDecryptCbc(fek, iv, cipherText, true);
+    } else if (v === 4) {
+      const objKey = computeObjectKey(fek, objNum, genNum, true);
+      if (streamObj.bytes.length <= 16) return streamObj.bytes;
+      const iv = streamObj.bytes.subarray(0, 16);
+      const cipherText = streamObj.bytes.subarray(16);
+      if (cipherText.length % 16 !== 0) return streamObj.bytes;
+      return aesDecryptCbc(objKey, iv, cipherText, true);
+    } else {
+      const objKey = computeObjectKey(fek, objNum, genNum, false);
+      return rc4(objKey, streamObj.bytes);
+    }
+  } catch (err) {
+    return streamObj.bytes;
+  }
+}
+
+/**
+ * Recursively decrypts all string and stream objects in the AST.
+ */
+function decryptAstRecursive(val, fek, objNum, genNum, v, r) {
+  if (val instanceof PdfString) {
+    val.bytes = decryptString(val, fek, objNum, genNum, v, r);
+  } else if (val instanceof PdfDict) {
+    for (const [k, child] of val.map.entries()) {
+      if (k === '/Encrypt' || k === '/ID') continue;
+      decryptAstRecursive(child, fek, objNum, genNum, v, r);
+    }
+  } else if (val instanceof PdfArray) {
+    for (let i = 0; i < val.length; i++) {
+      decryptAstRecursive(val.get(i), fek, objNum, genNum, v, r);
+    }
+  }
+}
+
+/**
+ * Completely unlocks the document (losslessly decrypts all objects and strips /Encrypt).
+ * PDF 문서를 완전히 복호화하고 /Encrypt 보안 딕셔너리를 제거하여 무제한 PDF로 변환합니다.
+ * @param {PdfDocument} doc - Target PDF Document AST / 대상 PDF AST
+ * @param {string} password - User or Owner password (default: '') / 비밀번호
+ * @returns {Object} { success: boolean, message?: string }
+ */
+function unlockDocument(doc, password = '') {
+  if (!doc.encryptRef) {
+    return { success: true, message: 'Document is not encrypted' };
+  }
+
+  const encObj = doc.getObject(doc.encryptRef.num, doc.encryptRef.gen);
+  if (!encObj || !(encObj.data instanceof PdfDict)) {
+    return { success: false, message: 'Invalid /Encrypt dictionary' };
+  }
+
+  const encDict = encObj.data;
+  const v = encDict.get('/V') || 1;
+  const r = encDict.get('/R') || 2;
+
+  let docIdBytes = new Uint8Array(0);
+  const idArray = doc.trailer.get('/ID');
+  if (idArray instanceof PdfArray && idArray.length > 0) {
+    const firstId = idArray.get(0);
+    if (firstId instanceof PdfString) docIdBytes = firstId.bytes;
+  }
+
+  const fek = computeFileEncryptionKey(encDict, password, docIdBytes);
+  if (!fek) {
+    return { success: false, message: 'Password required or incorrect' };
+  }
+
+  // Decrypt all objects in document
+  for (const obj of doc.objects.values()) {
+    if (obj.num === doc.encryptRef.num && obj.gen === doc.encryptRef.gen) {
+      continue;
+    }
+    if (obj.stream) {
+      obj.stream.bytes = decryptStream(obj.stream, fek, obj.num, obj.gen, v, r);
+    }
+    decryptAstRecursive(obj.data, fek, obj.num, obj.gen, v, r);
+  }
+
+  // Remove /Encrypt from document AST
+  doc.objects.delete(`${doc.encryptRef.num}:0`);
+  doc.trailer.delete('/Encrypt');
+
+  // Strip any lingering /Encrypt entries across all dictionary objects
+  for (const obj of doc.objects.values()) {
+    if (obj.data instanceof PdfDict) {
+      obj.data.delete('/Encrypt');
+    }
+  }
+
+  doc.encryptRef = null;
+  return { success: true };
+}
+
+/**
+ * Reconfigures PDF permissions (Stirling-PDF style: Change Permissions).
+ * PDF 권한만 세부적으로 재조정합니다.
+ * @param {PdfDocument} doc - Target PDF Document AST / 대상 PDF AST
+ * @param {Object} options - Configuration options / 권한 재조정 옵션
+ * @returns {Object} { success: boolean, message?: string }
+ */
+function changeDocumentPermissions(doc, options = {}) {
+  const {
+    permissions = {},
+    ownerPassword = 'master_' + Math.random().toString(36).substr(2, 8),
+    userPassword = '',
+    currentPassword = '',
+    algorithm = 'AES-128'
+  } = options;
+
+  // 1. If currently encrypted, decrypt it first using currentPassword
+  if (doc.encryptRef) {
+    const unlockRes = unlockDocument(doc, currentPassword);
+    if (!unlockRes.success) {
+      return unlockRes;
+    }
+  }
+
+  // 2. Set new permissions integer
+  const pVal = buildPermissions(permissions);
+  const isAes = algorithm === 'AES-128';
+  const v = isAes ? 4 : 2;
+  const r = isAes ? 4 : 3;
+  const keyLength = 16; // 128-bit
+
+  // 3. Generate random Document ID if not present
+  let docIdBytes;
+  let idArray = doc.trailer.get('/ID');
+  if (!idArray || !(idArray instanceof PdfArray) || idArray.length === 0) {
+    const id1 = new Uint8Array(16);
+    const id2 = new Uint8Array(16);
+    for (let i = 0; i < 16; i++) {
+      id1[i] = Math.floor(Math.random() * 256);
+      id2[i] = Math.floor(Math.random() * 256);
+    }
+    docIdBytes = id1;
+    idArray = new PdfArray();
+    idArray.push(new PdfString(id1, true));
+    idArray.push(new PdfString(id2, true));
+    doc.trailer.set('/ID', idArray);
+  } else {
+    docIdBytes = idArray.get(0).bytes;
+  }
+
+  // 4. Create new /Encrypt dictionary
+  const encDict = new PdfDict();
+  encDict.set('/Filter', '/Standard');
+  encDict.set('/V', v);
+  encDict.set('/R', r);
+  encDict.set('/Length', keyLength * 8);
+  encDict.set('/P', pVal);
+
+  if (isAes) {
+    const cfDict = new PdfDict();
+    const stdCf = new PdfDict();
+    stdCf.set('/CFM', '/AESV2');
+    stdCf.set('/Length', 16);
+    stdCf.set('/AuthEvent', '/DocOpen');
+    cfDict.set('/StdCF', stdCf);
+
+    encDict.set('/CF', cfDict);
+    encDict.set('/StmF', '/StdCF');
+    encDict.set('/StrF', '/StdCF');
+  }
+
+  // 5. Compute /O and /U hashes
+  const oHash = computeOwnerPasswordHash(ownerPassword, userPassword, r, keyLength);
+  encDict.set('/O', new PdfString(oHash, false));
+
+  // Compute FEK for user password
+  const fek = computeRawFek234(encDict, userPassword, docIdBytes);
+  const uHash = computeUserPasswordHash(fek, r, docIdBytes);
+  encDict.set('/U', new PdfString(uHash, false));
+
+  // 6. Find available object number for new /Encrypt dictionary
+  let maxNum = 0;
+  for (const obj of doc.objects.values()) {
+    if (obj.num > maxNum) maxNum = obj.num;
+  }
+  const encObjNum = maxNum + 1;
+  doc.setObject(encObjNum, 0, encDict, null);
+
+  doc.encryptRef = new PdfRef(encObjNum, 0);
+  doc.trailer.set('/Encrypt', doc.encryptRef);
+
+  // 7. Encrypt all strings and streams in the document AST
+  for (const obj of doc.objects.values()) {
+    if (obj.num === encObjNum) continue;
+
+    if (obj.stream) {
+      if (isAes) {
+        const objKey = computeObjectKey(fek, obj.num, obj.gen, true);
+        const iv = new Uint8Array(16);
+        for (let i = 0; i < 16; i++) iv[i] = Math.floor(Math.random() * 256);
+        const encrypted = aesEncryptCbc(objKey, iv, obj.stream.bytes, true);
+        const fullStream = new Uint8Array(16 + encrypted.length);
+        fullStream.set(iv, 0);
+        fullStream.set(encrypted, 16);
+        obj.stream.bytes = fullStream;
+      } else {
+        const objKey = computeObjectKey(fek, obj.num, obj.gen, false);
+        obj.stream.bytes = rc4(objKey, obj.stream.bytes);
+      }
+    }
+
+    encryptAstRecursive(obj.data, fek, obj.num, obj.gen, isAes);
+  }
+
+  return { success: true };
+}
+
+/**
+ * Recursively encrypts all string AST nodes.
+ */
+function encryptAstRecursive(val, fek, objNum, genNum, isAes) {
+  if (val instanceof PdfString) {
+    if (isAes) {
+      const objKey = computeObjectKey(fek, objNum, genNum, true);
+      const iv = new Uint8Array(16);
+      for (let i = 0; i < 16; i++) iv[i] = Math.floor(Math.random() * 256);
+      const encrypted = aesEncryptCbc(objKey, iv, val.bytes, true);
+      const full = new Uint8Array(16 + encrypted.length);
+      full.set(iv, 0);
+      full.set(encrypted, 16);
+      val.bytes = full;
+    } else {
+      const objKey = computeObjectKey(fek, objNum, genNum, false);
+      val.bytes = rc4(objKey, val.bytes);
+    }
+  } else if (val instanceof PdfDict) {
+    for (const [k, child] of val.map.entries()) {
+      if (k === '/Encrypt' || k === '/ID') continue;
+      encryptAstRecursive(child, fek, objNum, genNum, isAes);
+    }
+  } else if (val instanceof PdfArray) {
+    for (let i = 0; i < val.length; i++) {
+      encryptAstRecursive(val.get(i), fek, objNum, genNum, isAes);
+    }
+  }
+}
+
+/* Module: core/pdf_decryptor.js */
+/**
+ * @file src/core/pdf_decryptor.js
+ * @description Backward-compatible facade for PDF Security & Decryption engine.
+ *              PDF 보안 분석 및 복호화 엔진의 하위 호환 파사드 모듈.
+ */
+
+/* Module: core/pdf_serializer.js */
+/**
+ * @file src/core/pdf_serializer.js
+ * @description Lossless PDF Serializer and Binary Rebuilder.
+ *              무손실 PDF 직렬화기 및 바이너리 재작성기.
+ */
+
+
+
+/**
+ * Serializes an AST node value to a PDF-compliant string or byte format.
+ * AST 구문 노드 값을 PDF 표준 문자열 표현으로 직렬화합니다.
+ * @param {*} val - AST node / AST 노드
+ * @returns {string}
+ */
+function serializeValue(val) {
+  if (val === null || val === undefined) return 'null';
+  if (typeof val === 'boolean') return val ? 'true' : 'false';
+  if (typeof val === 'number') return String(val);
+  if (val instanceof PdfRef) return `${val.num} ${val.gen} R`;
+  if (val instanceof PdfString) return val.toString();
+
+  if (typeof val === 'string') {
+    return val.startsWith('/') ? val : '/' + val;
+  }
+
+  if (val instanceof PdfArray) {
+    let out = '[';
+    for (let i = 0; i < val.length; i++) {
+      out += (i > 0 ? ' ' : '') + serializeValue(val.get(i));
+    }
+    out += ']';
+    return out;
+  }
+
+  if (val instanceof PdfDict) {
+    let out = '<<\n';
+    for (const [k, v] of val.entries()) {
+      out += `  ${k} ${serializeValue(v)}\n`;
+    }
+    out += '>>';
+    return out;
+  }
+
+  return String(val);
+}
+
+/**
+ * Serializes a PdfDocument into a standard, compliant PDF binary buffer.
+ * PdfDocument 메모리 모델을 표준 PDF 바이너리 바이트 배열로 직렬화합니다.
+ * @param {PdfDocument} doc - PDF Document model / PDF 문서 모델
+ * @returns {Uint8Array} Valid PDF file bytes / 유효한 PDF 파일 바이트 배열
+ */
+function serializePdf(doc) {
+  // If trailer does not have /Encrypt, ensure encryptRef is also cleaned
+  if (!doc.trailer.has('/Encrypt')) {
+    doc.encryptRef = null;
+  }
+
+  const encNum = doc.encryptRef ? doc.encryptRef.num : null;
+
+  const headerStr = `%PDF-${doc.headerVersion || '1.6'}\n%\xE2\xE3\xCF\xD3\n`;
+  const chunks = [new TextEncoder().encode(headerStr)];
+  let currentOffset = chunks[0].length;
+
+  // Filter objects (if unencrypted and old encrypt object exists without reference, ignore it)
+  const sortedObjects = [...doc.objects.values()]
+    .filter(obj => {
+      if (!doc.encryptRef && obj.data instanceof PdfDict && obj.data.has('/Filter') && obj.data.has('/V')) {
+        return false;
+      }
+      return true;
+    })
+    .sort((a, b) => a.num - b.num);
+
+  const offsets = new Map(); // Key: objNum, Value: byteOffset
+  let maxObjNum = 0;
+
+  for (const obj of sortedObjects) {
+    maxObjNum = Math.max(maxObjNum, obj.num);
+    offsets.set(obj.num, currentOffset);
+
+    let objHeader = `${obj.num} ${obj.gen} obj\n`;
+    let objBody = '';
+
+    if (obj.stream) {
+      // Ensure /Length matches stream bytes length exactly
+      obj.stream.dict.set('/Length', obj.stream.bytes.length);
+      objBody = serializeValue(obj.stream.dict) + '\nstream\n';
+    } else {
+      objBody = serializeValue(obj.data) + '\n';
+    }
+
+    const headerBytes = new TextEncoder().encode(objHeader + objBody);
+    chunks.push(headerBytes);
+    currentOffset += headerBytes.length;
+
+    if (obj.stream) {
+      // Append raw stream bytes + endstream
+      chunks.push(obj.stream.bytes);
+      currentOffset += obj.stream.bytes.length;
+
+      const endStreamBytes = new TextEncoder().encode('\nendstream\nendobj\n');
+      chunks.push(endStreamBytes);
+      currentOffset += endStreamBytes.length;
+    } else {
+      const endObjBytes = new TextEncoder().encode('endobj\n');
+      chunks.push(endObjBytes);
+      currentOffset += endObjBytes.length;
+    }
+  }
+
+  // 3. Build new Cross-Reference Table (xref)
+  // 신규 교차 참조 테이블(xref) 작성
+  const startXrefOffset = currentOffset;
+  let xrefStr = `xref\n0 ${maxObjNum + 1}\n0000000000 65535 f \n`;
+
+  for (let i = 1; i <= maxObjNum; i++) {
+    const off = offsets.get(i);
+    if (off !== undefined) {
+      xrefStr += `${String(off).padStart(10, '0')} 00000 n \n`;
+    } else {
+      xrefStr += `0000000000 65535 f \n`;
+    }
+  }
+
+  // 4. Update Trailer and write startxref / %%EOF
+  // 트레일러 업데이트 및 startxref / %%EOF 작성
+  doc.trailer.set('/Size', maxObjNum + 1);
+  if (doc.encryptRef) {
+    doc.trailer.set('/Encrypt', doc.encryptRef);
+  } else {
+    doc.trailer.delete('/Encrypt');
+  }
+
+  let trailerStr = `trailer\n${serializeValue(doc.trailer)}\nstartxref\n${startXrefOffset}\n%%EOF\n`;
+
+  const xrefBytes = new TextEncoder().encode(xrefStr + trailerStr);
+  chunks.push(xrefBytes);
+  currentOffset += xrefBytes.length;
+
+  // 5. Concatenate all chunks into a single Uint8Array
+  // 모든 청크를 단일 Uint8Array로 결합
+  const finalPdf = new Uint8Array(currentOffset);
+  let writeOffset = 0;
+  for (const chunk of chunks) {
+    finalPdf.set(chunk, writeOffset);
+    writeOffset += chunk.length;
+  }
+
+  return finalPdf;
+}
+
+/* Module: ui/app.js */
+/**
+ * @file src/ui/app.js
+ * @description Main UI Application Controller for PDF Permission Master.
+ *              PDF 권한 관리 및 해제 웹 애플리케이션의 메인 UI 컨트롤러.
+ */
+
+
+
+
+
+
+// Application State / 애플리케이션 상태 관리
+const state = {
+  currentTab: 'changePerms', // 'changePerms' | 'unlockPerms'
+  activePreset: 'readPrint',  // 'full' | 'readPrint' | 'readOnly' | 'custom'
+  queue: [],                  // Array of queued file items
+  activePasswordItem: null
+};
+
+// DOM Element References / DOM 요소 참조
+const tabChangePerms = document.getElementById('tabChangePerms');
+const tabUnlockPerms = document.getElementById('tabUnlockPerms');
+const permConfigPanel = document.getElementById('permConfigPanel');
+const langToggleBtn = document.getElementById('langToggleBtn');
+
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const queueSection = document.getElementById('queueSection');
+const fileList = document.getElementById('fileList');
+const queueCountBadge = document.getElementById('queueCountBadge');
+const clearAllBtn = document.getElementById('clearAllBtn');
+const actionAllBtn = document.getElementById('actionAllBtn');
+
+// Permission Controls / 권한 설정 폼 요소
+const presetChips = document.querySelectorAll('.chip-btn');
+const printRadios = document.querySelectorAll('input[name="permPrint"]');
+const permCopy = document.getElementById('permCopy');
+const permModify = document.getElementById('permModify');
+const permAnnotate = document.getElementById('permAnnotate');
+const permFillForms = document.getElementById('permFillForms');
+const permAssemble = document.getElementById('permAssemble');
+const permExtractAccessibility = document.getElementById('permExtractAccessibility');
+
+const ownerPasswordInput = document.getElementById('ownerPasswordInput');
+const userPasswordInput = document.getElementById('userPasswordInput');
+const algorithmSelect = document.getElementById('algorithmSelect');
+
+// Password Modal / 비밀번호 모달
+const passwordModal = document.getElementById('passwordModal');
+const modalPasswordInput = document.getElementById('modalPasswordInput');
+const modalCancelBtn = document.getElementById('modalCancelBtn');
+const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+const modalFileDesc = document.getElementById('modalFileDesc');
+
+/**
+ * Format bytes to readable size string.
+ * 파일 크기를 사람이 읽기 쉬운 문자열로 변환합니다.
+ */
+function formatFileSize(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+/**
+ * Collects current permission options configured in the UI.
+ * UI에 설정된 현재 목표 권한 옵션 객체를 반환합니다.
+ */
+function getTargetPermissions() {
+  const selectedPrint = document.querySelector('input[name="permPrint"]:checked')?.value || 'high';
+  return {
+    canPrint: selectedPrint !== 'none',
+    canPrintHighQuality: selectedPrint === 'high',
+    canCopy: permCopy.checked,
+    canModify: permModify.checked,
+    canAnnotate: permAnnotate.checked,
+    canFillForms: permFillForms.checked,
+    canAssemble: permAssemble.checked,
+    canExtractAccessibility: permExtractAccessibility.checked
+  };
+}
+
+/**
+ * Applies a preset configuration to the UI toggles.
+ * 선택한 프리셋 설정을 UI 토글 및 컨트롤에 적용합니다.
+ */
+function applyPreset(presetName) {
+  state.activePreset = presetName;
+  presetChips.forEach(chip => {
+    chip.classList.toggle('active', chip.dataset.preset === presetName);
+  });
+
+  if (presetName === 'full') {
+    document.querySelector('input[name="permPrint"][value="high"]').checked = true;
+    permCopy.checked = true;
+    permModify.checked = true;
+    permAnnotate.checked = true;
+    permFillForms.checked = true;
+    permAssemble.checked = true;
+    permExtractAccessibility.checked = true;
+  } else if (presetName === 'readPrint') {
+    document.querySelector('input[name="permPrint"][value="high"]').checked = true;
+    permCopy.checked = false;
+    permModify.checked = false;
+    permAnnotate.checked = false;
+    permFillForms.checked = true;
+    permAssemble.checked = false;
+    permExtractAccessibility.checked = true;
+  } else if (presetName === 'readOnly') {
+    document.querySelector('input[name="permPrint"][value="none"]').checked = true;
+    permCopy.checked = false;
+    permModify.checked = false;
+    permAnnotate.checked = false;
+    permFillForms.checked = false;
+    permAssemble.checked = false;
+    permExtractAccessibility.checked = true;
+  }
+}
+
+/**
+ * Switch tabs between 'changePerms' and 'unlockPerms'.
+ * 탭 전환 처리.
+ */
+function switchTab(tabName) {
+  state.currentTab = tabName;
+  tabChangePerms.classList.toggle('active', tabName === 'changePerms');
+  tabChangePerms.setAttribute('aria-selected', tabName === 'changePerms');
+  tabUnlockPerms.classList.toggle('active', tabName === 'unlockPerms');
+  tabUnlockPerms.setAttribute('aria-selected', tabName === 'unlockPerms');
+
+  if (tabName === 'changePerms') {
+    permConfigPanel.classList.remove('hidden');
+    actionAllBtn.setAttribute('data-i18n', 'applyAllBtn');
+    actionAllBtn.textContent = t('applyAllBtn');
+  } else {
+    permConfigPanel.classList.add('hidden');
+    actionAllBtn.setAttribute('data-i18n', 'unlockAllBtn');
+    actionAllBtn.textContent = t('unlockAllBtn');
+  }
+
+  renderQueue();
+}
+
+/**
+ * Initializes UI event listeners.
+ * 이벤트 리스너를 초기화합니다.
+ */
+function init() {
+  updateDomTexts();
+
+  // Language toggle / 다국어 토글
+  if (langToggleBtn) {
+    langToggleBtn.addEventListener('click', () => {
+      const next = getLanguage() === 'ko' ? 'en' : 'ko';
+      setLanguage(next);
+      renderQueue();
+    });
+  }
+
+  // Mode Tabs / 모드 탭
+  if (tabChangePerms && tabUnlockPerms) {
+    tabChangePerms.addEventListener('click', () => switchTab('changePerms'));
+    tabUnlockPerms.addEventListener('click', () => switchTab('unlockPerms'));
+  }
+
+  // Presets / 프리셋 클릭
+  presetChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const preset = chip.dataset.preset;
+      applyPreset(preset);
+    });
+  });
+
+  // Custom change detection on toggles
+  const allToggles = [permCopy, permModify, permAnnotate, permFillForms, permAssemble, permExtractAccessibility];
+  allToggles.forEach(toggle => {
+    if (toggle) {
+      toggle.addEventListener('change', () => {
+        state.activePreset = 'custom';
+        presetChips.forEach(chip => chip.classList.toggle('active', chip.dataset.preset === 'custom'));
+      });
+    }
+  });
+  printRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      state.activePreset = 'custom';
+      presetChips.forEach(chip => chip.classList.toggle('active', chip.dataset.preset === 'custom'));
+    });
+  });
+
+  // Drag & drop file uploads
+  if (dropZone && fileInput) {
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove('dragover');
+      });
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      if (dt && dt.files && dt.files.length > 0) {
+        handleFiles(dt.files);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        handleFiles(e.target.files);
+        fileInput.value = '';
+      }
+    });
+  }
+
+  // Queue actions
+  if (clearAllBtn) {
+    clearAllBtn.addEventListener('click', () => {
+      state.queue = [];
+      renderQueue();
+    });
+  }
+
+  if (actionAllBtn) {
+    actionAllBtn.addEventListener('click', async () => {
+      for (const item of state.queue) {
+        if (item.status === 'ready' || item.status === 'error') {
+          await processItem(item);
+        }
+      }
+    });
+  }
+
+  // Modal actions
+  if (modalCancelBtn && passwordModal) {
+    modalCancelBtn.addEventListener('click', () => {
+      passwordModal.classList.add('hidden');
+      state.activePasswordItem = null;
+    });
+  }
+
+  if (modalConfirmBtn && modalPasswordInput) {
+    modalConfirmBtn.addEventListener('click', async () => {
+      const pw = modalPasswordInput.value;
+      const item = state.activePasswordItem;
+      if (item) {
+        passwordModal.classList.add('hidden');
+        await processItem(item, pw);
+      }
+    });
+  }
+
+  // Apply default preset
+  applyPreset('readPrint');
+}
+
+/**
+ * Handles newly selected PDF files.
+ * 추가된 파일들을 큐에 등록하고 보안 분석을 진행합니다.
+ */
+async function handleFiles(files) {
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      continue;
+    }
+
+    const item = {
+      id: 'file_' + Math.random().toString(36).substr(2, 9),
+      file,
+      name: file.name,
+      size: file.size,
+      status: 'analyzing', // 'analyzing' | 'ready' | 'processing' | 'done' | 'error'
+      securityInfo: null,
+      doc: null,
+      resultBlob: null,
+      downloadUrl: null,
+      errorMsg: null
+    };
+
+    state.queue.push(item);
+    renderQueue();
+
+    // Analyze security asynchronously
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const doc = parsePdf(arrayBuffer);
+      const securityInfo = analyzeSecurity(doc);
+
+      item.doc = doc;
+      item.securityInfo = securityInfo;
+      item.status = 'ready';
+    } catch (err) {
+      console.error('Failed to parse PDF:', err);
+      item.status = 'error';
+      item.errorMsg = err.message || 'Corrupted or invalid PDF format';
+    }
+    renderQueue();
+  }
+}
+
+/**
+ * Processes a single file item (Change Permissions or Unlock).
+ * 파일 아이템에 대해 권한 재조정 또는 완전 해제를 실행합니다.
+ */
+async function processItem(item, providedPassword = '') {
+  item.status = 'processing';
+  item.errorMsg = null;
+  renderQueue();
+
+  try {
+    const arrayBuffer = await item.file.arrayBuffer();
+    const doc = parsePdf(arrayBuffer);
+
+    if (state.currentTab === 'changePerms') {
+      // Change Permissions Mode
+      const targetPermissions = getTargetPermissions();
+      const ownerPassword = ownerPasswordInput.value.trim() || 'master_' + Math.random().toString(36).substr(2, 8);
+      const userPassword = userPasswordInput.value;
+      const algorithm = algorithmSelect.value || 'AES-128';
+
+      const res = changeDocumentPermissions(doc, {
+        permissions: targetPermissions,
+        ownerPassword,
+        userPassword,
+        currentPassword: providedPassword,
+        algorithm
+      });
+
+      if (!res.success) {
+        if (res.message?.includes('Password required') || res.message?.includes('incorrect')) {
+          item.status = 'ready';
+          state.activePasswordItem = item;
+          modalFileDesc.textContent = `"${item.name}" ` + t('modalFileDesc');
+          modalPasswordInput.value = '';
+          passwordModal.classList.remove('hidden');
+          modalPasswordInput.focus();
+          return;
+        }
+        throw new Error(res.message || 'Permission modification failed');
+      }
+
+      const outputBytes = serializePdf(doc);
+      const blob = new Blob([outputBytes], { type: 'application/pdf' });
+      item.resultBlob = blob;
+      item.downloadUrl = URL.createObjectURL(blob);
+      item.status = 'done';
+    } else {
+      // Unlock Mode
+      const res = unlockDocument(doc, providedPassword);
+      if (!res.success) {
+        if (res.message?.includes('Password required') || res.message?.includes('incorrect')) {
+          item.status = 'ready';
+          state.activePasswordItem = item;
+          modalFileDesc.textContent = `"${item.name}" ` + t('modalFileDesc');
+          modalPasswordInput.value = '';
+          passwordModal.classList.remove('hidden');
+          modalPasswordInput.focus();
+          return;
+        }
+        throw new Error(res.message || 'Unlock failed');
+      }
+
+      const outputBytes = serializePdf(doc);
+      const blob = new Blob([outputBytes], { type: 'application/pdf' });
+      item.resultBlob = blob;
+      item.downloadUrl = URL.createObjectURL(blob);
+      item.status = 'done';
+    }
+  } catch (err) {
+    console.error('Process error:', err);
+    item.status = 'error';
+    item.errorMsg = err.message || 'Processing error';
+  }
+
+  renderQueue();
+}
+
+/**
+ * Renders the file queue list and status badges.
+ * 파일 목록 큐와 상태를 렌더링합니다.
+ */
+function renderQueue() {
+  if (state.queue.length === 0) {
+    queueSection.classList.add('hidden');
+    return;
+  }
+
+  queueSection.classList.remove('hidden');
+  queueCountBadge.textContent = state.queue.length;
+  fileList.innerHTML = '';
+
+  state.queue.forEach((item, idx) => {
+    const el = document.createElement('div');
+    el.className = 'file-item';
+
+    // Status text & badge class
+    let statusText = t('statusReady');
+    let statusClass = 'status-ready';
+
+    if (item.status === 'analyzing') {
+      statusText = t('statusAnalyzing');
+      statusClass = 'status-analyzing';
+    } else if (item.status === 'processing') {
+      statusText = state.currentTab === 'changePerms' ? t('statusProcessing') : t('statusDecrypting');
+      statusClass = 'status-processing';
+    } else if (item.status === 'done') {
+      statusText = t('statusDone');
+      statusClass = 'status-done';
+    } else if (item.status === 'error') {
+      statusText = item.errorMsg || t('statusError');
+      statusClass = 'status-error';
+    }
+
+    // Permission pills summary
+    let permsSummaryHtml = '';
+    if (item.securityInfo) {
+      const p = item.securityInfo.permissions || {};
+      const printClass = p.canPrint ? 'allowed' : 'restricted';
+      const copyClass = p.canCopy ? 'allowed' : 'restricted';
+      const modClass = p.canModify ? 'allowed' : 'restricted';
+
+      permsSummaryHtml = `
+        <div class="file-perms-summary">
+          <span class="badge ${item.securityInfo.isEncrypted ? 'security-badge' : ''}" style="padding: 2px 6px; font-size: 0.72rem;">
+            ${item.securityInfo.isEncrypted ? t('encryptedBadge') : t('unencryptedBadge')}
+          </span>
+          <span class="perm-pill ${printClass}">🖨️ ${p.canPrint ? (p.canPrintHighQuality ? 'Print (High)' : 'Print (Low)') : 'No Print'}</span>
+          <span class="perm-pill ${copyClass}">📋 ${p.canCopy ? 'Copy' : 'No Copy'}</span>
+          <span class="perm-pill ${modClass}">✏️ ${p.canModify ? 'Edit' : 'No Edit'}</span>
+        </div>
+      `;
+    }
+
+    // Actions button
+    let actionBtnHtml = '';
+    if (item.status === 'done' && item.downloadUrl) {
+      const filenamePrefix = state.currentTab === 'changePerms' ? 'secured_' : 'unlocked_';
+      actionBtnHtml = `
+        <a href="${item.downloadUrl}" download="${filenamePrefix}${item.name}" class="btn btn-primary btn-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+          ${state.currentTab === 'changePerms' ? t('applySingleBtn') : t('downloadUnlockedBtn')}
+        </a>
+      `;
+    } else if (item.status === 'ready' || item.status === 'error') {
+      actionBtnHtml = `
+        <button class="btn btn-primary btn-sm item-process-btn" data-id="${item.id}">
+          ${state.currentTab === 'changePerms' ? t('applySingleBtn') : t('downloadUnlockedBtn')}
+        </button>
+      `;
+    }
+
+    el.innerHTML = `
+      <div class="file-item-header">
+        <div class="file-meta">
+          <div class="file-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div>
+            <div class="file-name" title="${item.name}">${item.name}</div>
+            <div class="file-size">${formatFileSize(item.size)}</div>
+          </div>
+        </div>
+        <div class="file-status-badge ${statusClass}">
+          ${statusText}
+        </div>
+      </div>
+      ${permsSummaryHtml}
+      <div class="file-actions">
+        <button class="btn btn-secondary btn-sm item-remove-btn" data-id="${item.id}">✕</button>
+        ${actionBtnHtml}
+      </div>
+    `;
+
+    fileList.appendChild(el);
+  });
+
+  // Attach item action handlers
+  document.querySelectorAll('.item-remove-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = e.currentTarget.dataset.id;
+      state.queue = state.queue.filter(q => q.id !== id);
+      renderQueue();
+    });
+  });
+
+  document.querySelectorAll('.item-process-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const id = e.currentTarget.dataset.id;
+      const item = state.queue.find(q => q.id === id);
+      if (item) {
+        await processItem(item);
+      }
+    });
+  });
+}
+
+// Start application when DOM is loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+
+
+})();
+</script>
+</body>
+</html>
