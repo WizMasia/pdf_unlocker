@@ -1,0 +1,46 @@
+name: Release Standalone Bundle
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Publish Release Assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run Test Suites
+        run: |
+          npm test
+          npm run test:e2e
+
+      - name: Build Standalone Bundle
+        run: |
+          npm run build
+          cp dist/index.html dist/pdf-permission-master.html
+
+      - name: Create GitHub Release and Attach Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            dist/index.html
+            dist/pdf-permission-master.html
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
