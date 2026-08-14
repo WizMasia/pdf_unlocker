@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PDF Permission Unlocker | PDF 권한 해제</title>
-  <meta name="description" content="100% 브라우저 로컬에서 안전하게 PDF의 인쇄, 복사, 편집 권한을 무손실로 해제하는 오프라인 도구">
+  <title>PDF Permission Master | PDF 권한 관리 및 해제</title>
+  <meta name="description" content="100% 브라우저 로컬에서 안전하게 PDF의 인쇄, 복사, 수정, 주석 등의 권한을 재조정하거나 완전히 해제하는 오프라인 무손실 도구">
   <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
@@ -13,7 +13,7 @@
     <header class="app-header">
       <div class="logo-area">
         <div class="logo-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect width="18" height="18" x="3" y="3" rx="2"/>
             <path d="M7 7h10"/>
             <path d="M7 12h10"/>
@@ -21,8 +21,8 @@
           </svg>
         </div>
         <div class="logo-text">
-          <h1 data-i18n="appTitle">PDF Permission Unlocker</h1>
-          <p data-i18n="appSubtitle">Lossless Client-Side PDF Security & Permission Removal</p>
+          <h1 data-i18n="appTitle">PDF Permission Master</h1>
+          <p data-i18n="appSubtitle">100% Offline Lossless PDF Permission Reconfigurer & Security Unlocker</p>
         </div>
       </div>
       <div class="header-actions">
@@ -34,8 +34,161 @@
       </div>
     </header>
 
+    <!-- Mode Selector Tabs / 모드 전환 탭 -->
+    <nav class="mode-tabs" role="tablist">
+      <button id="tabChangePerms" class="tab-btn active" role="tab" aria-selected="true" data-tab="changePerms">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        <span data-i18n="tabChangePerms">⚙️ 권한 재조정 (Change Permissions)</span>
+      </button>
+      <button id="tabUnlockPerms" class="tab-btn" role="tab" aria-selected="false" data-tab="unlockPerms">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+        </svg>
+        <span data-i18n="tabUnlockPerms">🔓 권한 완전 해제 (Unlock)</span>
+      </button>
+    </nav>
+
     <!-- Main Content / 메인 컨텐츠 -->
     <main class="app-main">
+
+      <!-- Permissions Setting Panel (Change Permissions Mode) / 권한 설정 패널 -->
+      <section id="permConfigPanel" class="config-panel">
+        <!-- Preset Selector / 빠른 프리셋 선택 -->
+        <div class="preset-row">
+          <span class="preset-label" data-i18n="presetLabel">빠른 권한 프리셋:</span>
+          <div class="preset-chips">
+            <button type="button" class="chip-btn" data-preset="full" data-i18n="presetFull">모두 허용</button>
+            <button type="button" class="chip-btn active" data-preset="readPrint" data-i18n="presetReadPrint">읽기 및 인쇄 전용</button>
+            <button type="button" class="chip-btn" data-preset="readOnly" data-i18n="presetReadOnly">엄격한 열람 전용</button>
+            <button type="button" class="chip-btn" data-preset="custom" data-i18n="presetCustom">사용자 지정</button>
+          </div>
+        </div>
+
+        <div class="config-grid">
+          <!-- Left: Permissions Matrix / 세부 권한 설정 -->
+          <div class="config-card">
+            <h2 class="card-title" data-i18n="permSectionTitle">세부 권한 설정 (Permissions Configuration)</h2>
+
+            <!-- Print Permissions Radio -->
+            <div class="form-group print-group">
+              <label class="form-label" data-i18n="permPrintLabel">인쇄 허용 (Printing)</label>
+              <div class="radio-group">
+                <label class="radio-label">
+                  <input type="radio" name="permPrint" value="high" checked />
+                  <span data-i18n="permPrintHigh">고품질 인쇄 허용</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="permPrint" value="low" />
+                  <span data-i18n="permPrintLow">저해상도(150dpi)만 허용</span>
+                </label>
+                <label class="radio-label">
+                  <input type="radio" name="permPrint" value="none" />
+                  <span data-i18n="permPrintNone">인쇄 금지</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Toggles for other permissions -->
+            <div class="toggle-list">
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title" data-i18n="permCopyLabel">내용 복사 및 텍스트 추출 (Copy & Extract)</span>
+                  <span class="toggle-desc" data-i18n="permCopyDesc">텍스트 및 그래픽의 클립보드 복사를 허용합니다</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="permCopy" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title" data-i18n="permModifyLabel">문서 내용 수정 (Modify Content)</span>
+                  <span class="toggle-desc" data-i18n="permModifyDesc">페이지 본문 편집 및 변경을 허용합니다</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="permModify" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title" data-i18n="permAnnotateLabel">주석 및 메모 작성 (Annotations & Comments)</span>
+                  <span class="toggle-desc" data-i18n="permAnnotateDesc">주석, 메모, 서명 필드 수정을 허용합니다</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="permAnnotate" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title" data-i18n="permFillFormsLabel">양식 필드 입력 (Form Filling)</span>
+                  <span class="toggle-desc" data-i18n="permFillFormsDesc">대화형 폼 필드 입력 및 저장을 허용합니다</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="permFillForms" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title" data-i18n="permAssembleLabel">문서 조합 (Document Assembly)</span>
+                  <span class="toggle-desc" data-i18n="permAssembleDesc">페이지 삽입, 삭제, 회전 및 북마크 생성을 허용합니다</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="permAssemble" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-item">
+                <div class="toggle-info">
+                  <span class="toggle-title" data-i18n="permExtractAccessibilityLabel">접근성 낭독 추출 (Accessibility)</span>
+                  <span class="toggle-desc" data-i18n="permExtractAccessibilityDesc">시각 장애인을 위한 화면 낭독기 텍스트 추출을 허용합니다</span>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="permExtractAccessibility" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Security & Passwords / 암호화 및 비밀번호 설정 -->
+          <div class="config-card">
+            <h2 class="card-title" data-i18n="securitySectionTitle">암호화 및 비밀번호 설정 (Security & Passwords)</h2>
+
+            <div class="form-group">
+              <label class="form-label" for="ownerPasswordInput" data-i18n="ownerPasswordLabel">권한 관리자 암호 (Owner Password)</label>
+              <input type="password" id="ownerPasswordInput" class="input-text" data-i18n-placeholder="ownerPasswordPlaceholder" placeholder="관리자 암호 (미입력 시 자동 생성)" autocomplete="off" />
+              <span class="field-hint" data-i18n="ownerPasswordDesc">권한 설정을 보호하고 변경을 제한하는 마스터 암호입니다</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="userPasswordInput" data-i18n="userPasswordLabel">문서 열람 암호 (User Password - 선택 사항)</label>
+              <input type="password" id="userPasswordInput" class="input-text" data-i18n-placeholder="userPasswordPlaceholder" placeholder="열람 암호 (선택 사항)" autocomplete="off" />
+              <span class="field-hint" data-i18n="userPasswordDesc">문서를 열 때 입력해야 하는 암호입니다 (비워두면 암호 없이 즉시 열림)</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="algorithmSelect" data-i18n="algorithmLabel">암호화 표준 (Encryption Standard)</label>
+              <select id="algorithmSelect" class="input-select">
+                <option value="AES-128" selected>AES-128 (Standard Security Rev 4 - 권장)</option>
+                <option value="RC4-128">RC4-128 (Standard Security Rev 3)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Drop Zone / 드래그 앤 드롭 영역 -->
       <section id="dropZone" class="drop-zone" tabindex="0" role="button" aria-label="Upload PDF Files">
         <input type="file" id="fileInput" class="file-input" accept="application/pdf" multiple />
@@ -48,10 +201,10 @@
             </svg>
           </div>
           <h2 class="drop-title" data-i18n="dropTitle">PDF 파일을 여기에 드래그하거나 클릭하여 선택하세요</h2>
-          <p class="drop-desc" data-i18n="dropDesc">인쇄 제한, 텍스트 복사 금지, 수정 제한이 걸린 PDF 파일을 원본 손실 없이 해제합니다</p>
+          <p class="drop-desc" data-i18n="dropDesc">서버 업로드 없이 100% 브라우저 메모리 내에서 안전하고 무손실로 처리됩니다</p>
           <div class="privacy-note">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <span data-i18n="privacyNote">파일이 서버로 전송되지 않으며, 기기 내 메모리에서만 안전하게 처리됩니다</span>
+            <span data-i18n="privacyNote">모든 처리는 브라우저 로컬에서 안전하게 수행되며 파일이 외부로 전송되지 않습니다</span>
           </div>
         </div>
       </section>
@@ -65,7 +218,7 @@
           </div>
           <div class="queue-actions">
             <button id="clearAllBtn" class="btn btn-secondary btn-sm" data-i18n="clearAllBtn">전체 지우기</button>
-            <button id="unlockAllBtn" class="btn btn-primary" data-i18n="unlockAllBtn">모든 권한 일괄 해제</button>
+            <button id="actionAllBtn" class="btn btn-primary" data-i18n="applyAllBtn">선택한 권한 일괄 적용</button>
           </div>
         </div>
 
@@ -77,29 +230,30 @@
     <div id="passwordModal" class="modal hidden" role="dialog" aria-modal="true">
       <div class="modal-backdrop"></div>
       <div class="modal-content">
-        <h3 data-i18n="modalTitle">열기 비밀번호 입력</h3>
-        <p id="modalFileDesc" class="modal-desc">이 PDF 파일은 문서 열람 암호가 설정되어 있습니다.</p>
+        <h3 data-i18n="modalTitle">문서 열기 비밀번호 필요</h3>
+        <p id="modalFileDesc" class="modal-desc" data-i18n="modalFileDesc">이 문서는 열람 암호가 걸려 있습니다. 비밀번호를 입력하면 권한 재조정 또는 해제가 가능합니다.</p>
         <div class="form-group">
-          <input type="password" id="modalPasswordInput" class="input-text" placeholder="비밀번호를 입력하세요" autocomplete="off" />
+          <input type="password" id="modalPasswordInput" class="input-text" data-i18n-placeholder="modalPasswordPlaceholder" placeholder="비밀번호를 입력하세요" autocomplete="off" />
         </div>
         <div class="modal-actions">
           <button id="modalCancelBtn" class="btn btn-secondary" data-i18n="modalCancelBtn">취소</button>
-          <button id="modalConfirmBtn" class="btn btn-primary" data-i18n="modalConfirmBtn">권한 해제</button>
+          <button id="modalConfirmBtn" class="btn btn-primary" data-i18n="modalConfirmBtn">확인</button>
         </div>
       </div>
     </div>
 
     <!-- Footer / 푸터 -->
     <footer class="app-footer">
-      <p data-i18n="footerText">PDF Permission Unlocker &copy; 2026 — Zero-dependency, 100% Client-side Security Removal</p>
+      <p data-i18n="footerText">PDF Permission Master &copy; 2026 — Zero-dependency, 100% Client-side Security & Permission Control</p>
     </footer>
   </div>
 
   <!-- Development Scripts / 개발용 스크립트 모듈 -->
   <script type="module" src="ui/i18n.js"></script>
   <script type="module" src="core/crypto.js"></script>
+  <script type="module" src="core/pdf_ast.js"></script>
   <script type="module" src="core/pdf_parser.js"></script>
-  <script type="module" src="core/pdf_decryptor.js"></script>
+  <script type="module" src="core/pdf_security.js"></script>
   <script type="module" src="core/pdf_serializer.js"></script>
   <script type="module" src="ui/app.js"></script>
 </body>

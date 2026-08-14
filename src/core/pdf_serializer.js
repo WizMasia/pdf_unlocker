@@ -1,15 +1,15 @@
 /**
  * @file src/core/pdf_serializer.js
- * @description Lossless PDF Serializer and Rebuilder (Strips /Encrypt, recalculates XRef & offsets).
- *              무손실 PDF 직렬화기 및 재작성기 (/Encrypt 제거, 교차 참조 테이블 및 오프셋 재계산).
+ * @description Lossless PDF Serializer and Binary Rebuilder.
+ *              무손실 PDF 직렬화기 및 바이너리 재작성기.
  */
 
-import { PdfDict, PdfArray, PdfString, PdfRef, PdfStream } from './pdf_parser.js';
+import { PdfDict, PdfArray, PdfString, PdfRef, PdfStream, PdfObject, PdfDocument } from './pdf_ast.js';
 
 /**
- * Serializes an AST node value to a PDF compliant string/byte format.
- * 구문 트리 노드 값을 PDF 표준 문자열 표현으로 직렬화합니다.
- * @param {*} val - AST value node / 구문 트리 노드
+ * Serializes an AST node value to a PDF-compliant string or byte format.
+ * AST 구문 노드 값을 PDF 표준 문자열 표현으로 직렬화합니다.
+ * @param {*} val - AST node / AST 노드
  * @returns {string}
  */
 export function serializeValue(val) {
@@ -45,26 +45,31 @@ export function serializeValue(val) {
 }
 
 /**
- * Serializes a decrypted PdfDocument into a standard unencrypted PDF binary buffer.
- * 복호화된 PdfDocument를 표준 비암호화 PDF 바이너리 버퍼로 재작성합니다.
- * @param {PdfDocument} doc - Decrypted PDF document model / 복호화된 PDF 문서 모델
- * @returns {Uint8Array} Unencrypted valid PDF bytes / 비암호화 유효 PDF 바이트 배열
+ * Serializes a PdfDocument into a standard, compliant PDF binary buffer.
+ * PdfDocument 메모리 모델을 표준 PDF 바이너리 바이트 배열로 직렬화합니다.
+ * @param {PdfDocument} doc - PDF Document model / PDF 문서 모델
+ * @returns {Uint8Array} Valid PDF file bytes / 유효한 PDF 파일 바이트 배열
  */
 export function serializePdf(doc) {
-  const encNum = doc.encryptRef ? doc.encryptRef.num : (doc.trailer.get('/Encrypt') ? doc.trailer.get('/Encrypt').num : null);
+  // If trailer does not have /Encrypt, ensure encryptRef is also cleaned
+  if (!doc.trailer.has('/Encrypt')) {
+    doc.encryptRef = null;
+  }
 
-  // 1. Clean trailer dictionary / 트레일러에서 /Encrypt 제거
-  doc.trailer.delete('/Encrypt');
-  doc.encryptRef = null;
+  const encNum = doc.encryptRef ? doc.encryptRef.num : null;
 
   const headerStr = `%PDF-${doc.headerVersion || '1.6'}\n%\xE2\xE3\xCF\xD3\n`;
   const chunks = [new TextEncoder().encode(headerStr)];
   let currentOffset = chunks[0].length;
 
-  // 2. Sort and serialize all objects except the old Encrypt dictionary
-  // 이전 Encrypt 딕셔너리를 제외한 모든 객체를 번호순으로 정렬 및 직렬화
+  // Filter objects (if unencrypted and old encrypt object exists without reference, ignore it)
   const sortedObjects = [...doc.objects.values()]
-    .filter(obj => obj.num !== encNum)
+    .filter(obj => {
+      if (!doc.encryptRef && obj.data instanceof PdfDict && obj.data.has('/Filter') && obj.data.has('/V')) {
+        return false;
+      }
+      return true;
+    })
     .sort((a, b) => a.num - b.num);
 
   const offsets = new Map(); // Key: objNum, Value: byteOffset
@@ -78,7 +83,7 @@ export function serializePdf(doc) {
     let objBody = '';
 
     if (obj.stream) {
-      // Ensure Length in stream dict matches decrypted stream bytes
+      // Ensure /Length matches stream bytes length exactly
       obj.stream.dict.set('/Length', obj.stream.bytes.length);
       objBody = serializeValue(obj.stream.dict) + '\nstream\n';
     } else {
@@ -121,6 +126,12 @@ export function serializePdf(doc) {
   // 4. Update Trailer and write startxref / %%EOF
   // 트레일러 업데이트 및 startxref / %%EOF 작성
   doc.trailer.set('/Size', maxObjNum + 1);
+  if (doc.encryptRef) {
+    doc.trailer.set('/Encrypt', doc.encryptRef);
+  } else {
+    doc.trailer.delete('/Encrypt');
+  }
+
   let trailerStr = `trailer\n${serializeValue(doc.trailer)}\nstartxref\n${startXrefOffset}\n%%EOF\n`;
 
   const xrefBytes = new TextEncoder().encode(xrefStr + trailerStr);
@@ -128,7 +139,7 @@ export function serializePdf(doc) {
   currentOffset += xrefBytes.length;
 
   // 5. Concatenate all chunks into a single Uint8Array
-  // 모든 청크를 하나의 Uint8Array로 결합
+  // 모든 청크를 단일 Uint8Array로 결합
   const finalPdf = new Uint8Array(currentOffset);
   let writeOffset = 0;
   for (const chunk of chunks) {

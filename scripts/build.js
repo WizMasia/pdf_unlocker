@@ -61,7 +61,9 @@ export function buildSingleFile() {
   const jsModules = [
     'ui/i18n.js',
     'core/crypto.js',
+    'core/pdf_ast.js',
     'core/pdf_parser.js',
+    'core/pdf_security.js',
     'core/pdf_decryptor.js',
     'core/pdf_serializer.js',
     'ui/app.js'
@@ -72,7 +74,7 @@ export function buildSingleFile() {
   html = html.replace(/<script\s+src=["'][^"']+["']><\/script>/gi, '');
 
   let combinedJs = '/* ==========================================================================\n' +
-                    ' * PDF Permission Unlocker - Standalone Offline Bundle\n' +
+                    ' * PDF Permission Master - Standalone Offline Bundle\n' +
                     ' * 100% Client-side, Zero Network Calls, Privacy Protected\n' +
                     ' * ========================================================================== */\n\n';
 

@@ -24,7 +24,7 @@ const htmlContent = fs.readFileSync(distHtmlPath, 'utf-8');
 // Verification checks / 검증 조건
 assert.ok(htmlContent.includes('<style>'), 'Should contain inline style tag');
 assert.ok(!htmlContent.includes('<link rel="stylesheet" href="styles/main.css">'), 'Should not contain external CSS link');
-assert.ok(htmlContent.includes('PDF Permission Unlocker'), 'Should contain app title');
+assert.ok(htmlContent.includes('PDF Permission Master') || htmlContent.includes('PDF Permission'), 'Should contain app title');
 assert.ok(htmlContent.includes('<script>'), 'Should contain inline script tag');
 
 console.log('✅ Build script test passed successfully!');

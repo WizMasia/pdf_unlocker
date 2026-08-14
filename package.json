@@ -1,23 +1,24 @@
 {
   "name": "pdf-permission-unlocker",
-  "version": "0.1.0",
-  "description": "100% Offline, Client-Side Lossless PDF Permission & Security Unlocker",
+  "version": "0.2.0",
+  "description": "100% Offline, Client-Side Lossless PDF Permission Reconfigurer & Unlocker",
   "main": "dist/index.html",
   "type": "module",
   "scripts": {
     "build": "node scripts/build.js",
-    "test": "node test/test_crypto.js && node test/test_pdf_parser.js && node test/test_pdf_decryptor.js && node test/test_pdf_serializer.js && node test/test_build.js",
+    "test": "node test/test_crypto.js && node test/test_pdf_parser.js && node test/test_pdf_security.js && node test/test_pdf_decryptor.js && node test/test_pdf_serializer.js && node test/test_build.js",
     "generate-fixtures": "node test/generate_fixtures.js",
     "test:e2e": "node test/run_e2e_tests.js"
   },
   "keywords": [
     "pdf",
-    "unlocker",
     "permissions",
-    "lossless",
-    "offline",
+    "change-permissions",
+    "unlocker",
     "security-handler",
-    "pdf-decrypt"
+    "offline",
+    "lossless",
+    "stirling-pdf"
   ],
   "author": "Antigravity",
   "license": "MIT"

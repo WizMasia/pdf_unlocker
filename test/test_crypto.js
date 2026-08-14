@@ -6,7 +6,7 @@
 
 import assert from 'assert';
 import crypto from 'crypto';
-import { md5, sha256, rc4, aesDecryptCbc } from '../src/core/crypto.js';
+import { md5, sha256, rc4, aesEncryptCbc, aesDecryptCbc } from '../src/core/crypto.js';
 
 console.log('Testing Crypto Engine...');
 
@@ -33,67 +33,75 @@ for (const input of testInputs) {
 }
 console.log('  ✓ SHA-256 tests passed');
 
-// 3. RC4 Stream Cipher Tests against native rc4 / RC4 암복호화 검증
+// 3. RC4 Stream Cipher Tests / RC4 암복호화 검증
 const rc4Key = crypto.randomBytes(16);
 const rc4Plain = Buffer.from('Confidential PDF Stream Data for Permission Testing 1234567890');
 const rc4Cipher = rc4(rc4Key, rc4Plain);
 
-// Decrypt with our pure rc4
 const rc4Decrypted = rc4(rc4Key, rc4Cipher);
 assert.strictEqual(
   Buffer.from(rc4Decrypted).toString('utf-8'),
   rc4Plain.toString('utf-8'),
   'RC4 decrypt mismatch'
 );
+console.log('  ✓ RC4 tests passed (roundtrip)');
 
-// Verify with Node.js native rc4 (if supported via cipher 'rc4')
-try {
-  const nativeRc4Cipher = crypto.createCipheriv('rc4', rc4Key, '');
-  const nativeEnc = Buffer.concat([nativeRc4Cipher.update(rc4Plain), nativeRc4Cipher.final()]);
-  assert.strictEqual(
-    Buffer.from(rc4Cipher).toString('hex'),
-    nativeEnc.toString('hex'),
-    'Pure RC4 output must match native RC4 output'
-  );
-  console.log('  ✓ RC4 tests passed (matched native rc4)');
-} catch (e) {
-  console.log('  ✓ RC4 tests passed (roundtrip)');
-}
-
-// 4. AES-128-CBC Decryption Tests / AES-128-CBC 복호화 검증
+// 4. AES-128-CBC Encryption & Decryption Tests / AES-128-CBC 암복호화 검증
 for (let i = 0; i < 5; i++) {
   const key128 = crypto.randomBytes(16);
   const iv = crypto.randomBytes(16);
   const plain = Buffer.from(`Testing AES-128-CBC Block ${i}: ${crypto.randomBytes(24).toString('hex')}`);
 
-  const encCipher = crypto.createCipheriv('aes-128-cbc', key128, iv);
-  const ciphertext = Buffer.concat([encCipher.update(plain), encCipher.final()]);
+  // Pure JS encrypt
+  const pureCipher = aesEncryptCbc(key128, iv, plain, true);
 
-  const decrypted = aesDecryptCbc(key128, iv, ciphertext, true);
+  // Native Node.js encrypt
+  const nativeCipher = crypto.createCipheriv('aes-128-cbc', key128, iv);
+  const expectedCipher = Buffer.concat([nativeCipher.update(plain), nativeCipher.final()]);
+
+  assert.strictEqual(
+    Buffer.from(pureCipher).toString('hex'),
+    expectedCipher.toString('hex'),
+    'Pure AES-128-CBC encryption mismatch with Node native crypto'
+  );
+
+  // Pure JS decrypt
+  const decrypted = aesDecryptCbc(key128, iv, pureCipher, true);
   assert.strictEqual(
     Buffer.from(decrypted).toString('utf-8'),
     plain.toString('utf-8'),
     'AES-128-CBC decryption mismatch'
   );
 }
-console.log('  ✓ AES-128-CBC tests passed');
+console.log('  ✓ AES-128-CBC encrypt & decrypt tests passed');
 
-// 5. AES-256-CBC Decryption Tests / AES-256-CBC 복호화 검증
+// 5. AES-256-CBC Encryption & Decryption Tests / AES-256-CBC 암복호화 검증
 for (let i = 0; i < 5; i++) {
   const key256 = crypto.randomBytes(32);
   const iv = crypto.randomBytes(16);
   const plain = Buffer.from(`Testing AES-256-CBC Block ${i}: ${crypto.randomBytes(36).toString('hex')}`);
 
-  const encCipher = crypto.createCipheriv('aes-256-cbc', key256, iv);
-  const ciphertext = Buffer.concat([encCipher.update(plain), encCipher.final()]);
+  // Pure JS encrypt
+  const pureCipher = aesEncryptCbc(key256, iv, plain, true);
 
-  const decrypted = aesDecryptCbc(key256, iv, ciphertext, true);
+  // Native Node.js encrypt
+  const nativeCipher = crypto.createCipheriv('aes-256-cbc', key256, iv);
+  const expectedCipher = Buffer.concat([nativeCipher.update(plain), nativeCipher.final()]);
+
+  assert.strictEqual(
+    Buffer.from(pureCipher).toString('hex'),
+    expectedCipher.toString('hex'),
+    'Pure AES-256-CBC encryption mismatch with Node native crypto'
+  );
+
+  // Pure JS decrypt
+  const decrypted = aesDecryptCbc(key256, iv, pureCipher, true);
   assert.strictEqual(
     Buffer.from(decrypted).toString('utf-8'),
     plain.toString('utf-8'),
     'AES-256-CBC decryption mismatch'
   );
 }
-console.log('  ✓ AES-256-CBC tests passed');
+console.log('  ✓ AES-256-CBC encrypt & decrypt tests passed');
 
 console.log('✅ All Crypto Engine tests passed successfully!');

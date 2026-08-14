@@ -1,7 +1,7 @@
 /**
  * @file test/run_e2e_tests.js
- * @description Comprehensive End-to-End verification test across all permission restricted fixtures.
- *              모든 권한 제한 테스트 픽스처를 대상으로 하는 종합 E2E 검증 테스트.
+ * @description Comprehensive End-to-End verification test across all permission restricted fixtures and change permissions workflows.
+ *              모든 권한 제한 픽스처 및 권한 재조정 워크플로우를 대상으로 하는 종합 E2E 검증 테스트.
  */
 
 import assert from 'assert';
@@ -9,7 +9,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { parsePdf } from '../src/core/pdf_parser.js';
-import { analyzePdfSecurity, unlockPdfDocument } from '../src/core/pdf_decryptor.js';
+import { analyzeSecurity, unlockDocument, changeDocumentPermissions } from '../src/core/pdf_security.js';
 import { serializePdf } from '../src/core/pdf_serializer.js';
 import { buildSingleFile } from '../scripts/build.js';
 
@@ -18,7 +18,7 @@ const __dirname = path.dirname(__filename);
 const fixturesDir = path.join(__dirname, 'fixtures');
 
 console.log('====================================================');
-console.log('🚀 Starting Comprehensive End-to-End PDF Unlock Tests');
+console.log('🚀 Starting Comprehensive End-to-End PDF Tests');
 console.log('====================================================\n');
 
 // 1. Build Standalone HTML Bundle / 단일 파일 번들 빌드
@@ -108,11 +108,11 @@ for (const tc of testCases) {
 
   // A. Parse & Analyze / 파싱 및 분석
   const doc = parsePdf(rawBytes);
-  const sec = analyzePdfSecurity(doc);
+  const sec = analyzeSecurity(doc);
   tc.checkOriginal(sec);
 
   // B. Unlock / 권한 해제
-  const unlockRes = unlockPdfDocument(doc, tc.password);
+  const unlockRes = unlockDocument(doc, tc.password);
   assert.strictEqual(unlockRes.success, true, `Unlock failed for ${tc.name}`);
 
   // C. Serialize / 직렬화
@@ -124,7 +124,7 @@ for (const tc of testCases) {
   assert.strictEqual(reparsedDoc.encryptRef, null, 'Reparsed document must have no /Encrypt ref');
   assert.strictEqual(reparsedDoc.trailer.has('/Encrypt'), false, 'Trailer must not contain /Encrypt');
 
-  const reparsedSec = analyzePdfSecurity(reparsedDoc);
+  const reparsedSec = analyzeSecurity(reparsedDoc);
   assert.strictEqual(reparsedSec.isEncrypted, false, 'Reparsed document must be completely unencrypted');
   assert.strictEqual(reparsedSec.permissions.canPrint, true, 'Reparsed document must allow printing');
   assert.strictEqual(reparsedSec.permissions.canCopy, true, 'Reparsed document must allow copying');
@@ -140,6 +140,46 @@ for (const tc of testCases) {
   console.log(`  ✓ Case Passed: ${tc.name} -> Unlocked & Verified Losslessly`);
 }
 
+// 3. Test Cases for Change Permissions Workflow (Stirling-PDF style) / 권한 재조정 E2E 검증
+console.log('\n[Step 3] Verifying Change Permissions (Granular Permission Customization)...');
+{
+  const rawBytes = fs.readFileSync(path.join(fixturesDir, 'unencrypted.pdf'));
+  const doc = parsePdf(rawBytes);
+
+  // Apply custom permissions: Only allow low-res printing, form filling, and accessibility
+  const changeRes = changeDocumentPermissions(doc, {
+    permissions: {
+      canPrint: true,
+      canPrintHighQuality: false, // Low-res 150dpi only
+      canCopy: false,
+      canModify: false,
+      canAnnotate: false,
+      canFillForms: true,
+      canAssemble: false,
+      canExtractAccessibility: true
+    },
+    ownerPassword: 'MasterOwnerKey',
+    userPassword: '',
+    algorithm: 'AES-128'
+  });
+
+  assert.strictEqual(changeRes.success, true);
+  const serialized = serializePdf(doc);
+
+  const testDoc = parsePdf(serialized);
+  const testSec = analyzeSecurity(testDoc);
+
+  assert.strictEqual(testSec.isEncrypted, true);
+  assert.strictEqual(testSec.requiresPassword, false);
+  assert.strictEqual(testSec.permissions.canPrint, true);
+  assert.strictEqual(testSec.permissions.canPrintHighQuality, false, 'High quality print must be denied');
+  assert.strictEqual(testSec.permissions.canCopy, false, 'Copying must be denied');
+  assert.strictEqual(testSec.permissions.canModify, false, 'Modifying must be denied');
+  assert.strictEqual(testSec.permissions.canFillForms, true, 'Form filling must be allowed');
+  assert.strictEqual(testSec.permissions.canExtractAccessibility, true, 'Accessibility must be allowed');
+  console.log('  ✓ Change Permissions E2E customization verified.');
+}
+
 console.log('\n====================================================');
-console.log('🎉 ALL END-TO-END VERIFICATION TESTS PASSED (7/7)');
+console.log('🎉 ALL END-TO-END VERIFICATION TESTS PASSED (8/8)');
 console.log('====================================================\n');

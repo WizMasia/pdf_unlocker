@@ -1,30 +1,51 @@
 /**
  * @file src/ui/app.js
- * @description Main UI application controller for PDF Permission Unlocker.
- *              PDF 권한 해제 웹 애플리케이션의 메인 UI 컨트롤러.
+ * @description Main UI Application Controller for PDF Permission Master.
+ *              PDF 권한 관리 및 해제 웹 애플리케이션의 메인 UI 컨트롤러.
  */
 
 import { t, setLanguage, getLanguage, updateDomTexts } from './i18n.js';
 import { parsePdf } from '../core/pdf_parser.js';
-import { analyzePdfSecurity, unlockPdfDocument } from '../core/pdf_decryptor.js';
+import { analyzeSecurity, unlockDocument, changeDocumentPermissions } from '../core/pdf_security.js';
 import { serializePdf } from '../core/pdf_serializer.js';
 
-// State management / 상태 관리
+// Application State / 애플리케이션 상태 관리
 const state = {
-  queue: [], // Array of file items
+  currentTab: 'changePerms', // 'changePerms' | 'unlockPerms'
+  activePreset: 'readPrint',  // 'full' | 'readPrint' | 'readOnly' | 'custom'
+  queue: [],                  // Array of queued file items
   activePasswordItem: null
 };
 
-// DOM Elements / DOM 요소 참조
+// DOM Element References / DOM 요소 참조
+const tabChangePerms = document.getElementById('tabChangePerms');
+const tabUnlockPerms = document.getElementById('tabUnlockPerms');
+const permConfigPanel = document.getElementById('permConfigPanel');
+const langToggleBtn = document.getElementById('langToggleBtn');
+
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
 const queueSection = document.getElementById('queueSection');
 const fileList = document.getElementById('fileList');
 const queueCountBadge = document.getElementById('queueCountBadge');
 const clearAllBtn = document.getElementById('clearAllBtn');
-const unlockAllBtn = document.getElementById('unlockAllBtn');
-const langToggleBtn = document.getElementById('langToggleBtn');
+const actionAllBtn = document.getElementById('actionAllBtn');
 
+// Permission Controls / 권한 설정 폼 요소
+const presetChips = document.querySelectorAll('.chip-btn');
+const printRadios = document.querySelectorAll('input[name="permPrint"]');
+const permCopy = document.getElementById('permCopy');
+const permModify = document.getElementById('permModify');
+const permAnnotate = document.getElementById('permAnnotate');
+const permFillForms = document.getElementById('permFillForms');
+const permAssemble = document.getElementById('permAssemble');
+const permExtractAccessibility = document.getElementById('permExtractAccessibility');
+
+const ownerPasswordInput = document.getElementById('ownerPasswordInput');
+const userPasswordInput = document.getElementById('userPasswordInput');
+const algorithmSelect = document.getElementById('algorithmSelect');
+
+// Password Modal / 비밀번호 모달
 const passwordModal = document.getElementById('passwordModal');
 const modalPasswordInput = document.getElementById('modalPasswordInput');
 const modalCancelBtn = document.getElementById('modalCancelBtn');
@@ -32,8 +53,8 @@ const modalConfirmBtn = document.getElementById('modalConfirmBtn');
 const modalFileDesc = document.getElementById('modalFileDesc');
 
 /**
- * Format bytes to readable size.
- * 파일 크기를 사람이 읽기 쉬운 형식으로 변환합니다.
+ * Format bytes to readable size string.
+ * 파일 크기를 사람이 읽기 쉬운 문자열로 변환합니다.
  */
 function formatFileSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -42,7 +63,86 @@ function formatFileSize(bytes) {
 }
 
 /**
- * Initialize event listeners.
+ * Collects current permission options configured in the UI.
+ * UI에 설정된 현재 목표 권한 옵션 객체를 반환합니다.
+ */
+function getTargetPermissions() {
+  const selectedPrint = document.querySelector('input[name="permPrint"]:checked')?.value || 'high';
+  return {
+    canPrint: selectedPrint !== 'none',
+    canPrintHighQuality: selectedPrint === 'high',
+    canCopy: permCopy.checked,
+    canModify: permModify.checked,
+    canAnnotate: permAnnotate.checked,
+    canFillForms: permFillForms.checked,
+    canAssemble: permAssemble.checked,
+    canExtractAccessibility: permExtractAccessibility.checked
+  };
+}
+
+/**
+ * Applies a preset configuration to the UI toggles.
+ * 선택한 프리셋 설정을 UI 토글 및 컨트롤에 적용합니다.
+ */
+function applyPreset(presetName) {
+  state.activePreset = presetName;
+  presetChips.forEach(chip => {
+    chip.classList.toggle('active', chip.dataset.preset === presetName);
+  });
+
+  if (presetName === 'full') {
+    document.querySelector('input[name="permPrint"][value="high"]').checked = true;
+    permCopy.checked = true;
+    permModify.checked = true;
+    permAnnotate.checked = true;
+    permFillForms.checked = true;
+    permAssemble.checked = true;
+    permExtractAccessibility.checked = true;
+  } else if (presetName === 'readPrint') {
+    document.querySelector('input[name="permPrint"][value="high"]').checked = true;
+    permCopy.checked = false;
+    permModify.checked = false;
+    permAnnotate.checked = false;
+    permFillForms.checked = true;
+    permAssemble.checked = false;
+    permExtractAccessibility.checked = true;
+  } else if (presetName === 'readOnly') {
+    document.querySelector('input[name="permPrint"][value="none"]').checked = true;
+    permCopy.checked = false;
+    permModify.checked = false;
+    permAnnotate.checked = false;
+    permFillForms.checked = false;
+    permAssemble.checked = false;
+    permExtractAccessibility.checked = true;
+  }
+}
+
+/**
+ * Switch tabs between 'changePerms' and 'unlockPerms'.
+ * 탭 전환 처리.
+ */
+function switchTab(tabName) {
+  state.currentTab = tabName;
+  tabChangePerms.classList.toggle('active', tabName === 'changePerms');
+  tabChangePerms.setAttribute('aria-selected', tabName === 'changePerms');
+  tabUnlockPerms.classList.toggle('active', tabName === 'unlockPerms');
+  tabUnlockPerms.setAttribute('aria-selected', tabName === 'unlockPerms');
+
+  if (tabName === 'changePerms') {
+    permConfigPanel.classList.remove('hidden');
+    actionAllBtn.setAttribute('data-i18n', 'applyAllBtn');
+    actionAllBtn.textContent = t('applyAllBtn');
+  } else {
+    permConfigPanel.classList.add('hidden');
+    actionAllBtn.setAttribute('data-i18n', 'unlockAllBtn');
+    actionAllBtn.textContent = t('unlockAllBtn');
+  }
+
+  renderQueue();
+}
+
+/**
+ * Initializes UI event listeners.
  * 이벤트 리스너를 초기화합니다.
  */
 function init() {
@@ -57,7 +157,38 @@ function init() {
     });
   }
 
-  // File drop & select events / 파일 드롭 및 선택 이벤트
+  // Mode Tabs / 모드 탭
+  if (tabChangePerms && tabUnlockPerms) {
+    tabChangePerms.addEventListener('click', () => switchTab('changePerms'));
+    tabUnlockPerms.addEventListener('click', () => switchTab('unlockPerms'));
+  }
+
+  // Presets / 프리셋 클릭
+  presetChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const preset = chip.dataset.preset;
+      applyPreset(preset);
+    });
+  });
+
+  // Custom change detection on toggles
+  const allToggles = [permCopy, permModify, permAnnotate, permFillForms, permAssemble, permExtractAccessibility];
+  allToggles.forEach(toggle => {
+    if (toggle) {
+      toggle.addEventListener('change', () => {
+        state.activePreset = 'custom';
+        presetChips.forEach(chip => chip.classList.toggle('active', chip.dataset.preset === 'custom'));
+      });
+    }
+  });
+  printRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      state.activePreset = 'custom';
+      presetChips.forEach(chip => chip.classList.toggle('active', chip.dataset.preset === 'custom'));
+    });
+  });
+
+  // Drag & drop file uploads
   if (dropZone && fileInput) {
     dropZone.addEventListener('click', () => fileInput.click());
 
@@ -87,12 +218,12 @@ function init() {
     fileInput.addEventListener('change', (e) => {
       if (e.target.files && e.target.files.length > 0) {
         handleFiles(e.target.files);
-        fileInput.value = ''; // Reset
+        fileInput.value = '';
       }
     });
   }
 
-  // Queue actions / 큐 액션 버튼
+  // Queue actions
   if (clearAllBtn) {
     clearAllBtn.addEventListener('click', () => {
       state.queue = [];
@@ -100,8 +231,8 @@ function init() {
     });
   }
 
-  if (unlockAllBtn) {
-    unlockAllBtn.addEventListener('click', async () => {
+  if (actionAllBtn) {
+    actionAllBtn.addEventListener('click', async () => {
       for (const item of state.queue) {
         if (item.status === 'ready' || item.status === 'error') {
           await processItem(item);
@@ -110,7 +241,7 @@ function init() {
     });
   }
 
-  // Modal actions / 모달 버튼
+  // Modal actions
   if (modalCancelBtn && passwordModal) {
     modalCancelBtn.addEventListener('click', () => {
       passwordModal.classList.add('hidden');
@@ -128,11 +259,14 @@ function init() {
       }
     });
   }
+
+  // Apply default preset
+  applyPreset('readPrint');
 }
 
 /**
- * Handle added files.
- * 추가된 파일들을 큐에 등록하고 분석합니다.
+ * Handles newly selected PDF files.
+ * 추가된 파일들을 큐에 등록하고 보안 분석을 진행합니다.
  */
 async function handleFiles(files) {
   for (let i = 0; i < files.length; i++) {
@@ -146,7 +280,7 @@ async function handleFiles(files) {
       file,
       name: file.name,
       size: file.size,
-      status: 'analyzing', // 'analyzing', 'ready', 'processing', 'done', 'error'
+      status: 'analyzing', // 'analyzing' | 'ready' | 'processing' | 'done' | 'error'
       securityInfo: null,
       doc: null,
       resultBlob: null,
@@ -157,199 +291,223 @@ async function handleFiles(files) {
     state.queue.push(item);
     renderQueue();
 
-    // Read and analyze asynchronously / 비동기로 파일 읽기 및 분석
+    // Analyze security asynchronously
     try {
-      const buffer = await file.arrayBuffer();
-      const bytes = new Uint8Array(buffer);
-      const doc = parsePdf(bytes);
-      const sec = analyzePdfSecurity(doc);
+      const arrayBuffer = await file.arrayBuffer();
+      const doc = parsePdf(arrayBuffer);
+      const securityInfo = analyzeSecurity(doc);
 
       item.doc = doc;
-      item.securityInfo = sec;
+      item.securityInfo = securityInfo;
       item.status = 'ready';
     } catch (err) {
-      console.error('PDF Analysis error:', err);
+      console.error('Failed to parse PDF:', err);
       item.status = 'error';
-      item.errorMsg = err.message || 'Failed to parse PDF';
+      item.errorMsg = err.message || 'Corrupted or invalid PDF format';
     }
     renderQueue();
   }
 }
 
 /**
- * Process unlocking of a single file item.
- * 단일 파일 항목의 권한 해제를 수행합니다.
+ * Processes a single file item (Change Permissions or Unlock).
+ * 파일 아이템에 대해 권한 재조정 또는 완전 해제를 실행합니다.
  */
-async function processItem(item, password = '') {
-  if (item.securityInfo && item.securityInfo.requiresPassword && !password) {
-    // Show password modal / 비밀번호 입력 모달 팝업
-    state.activePasswordItem = item;
-    if (modalFileDesc) modalFileDesc.textContent = `${item.name}: ${t('modalFileDesc')}`;
-    if (modalPasswordInput) modalPasswordInput.value = '';
-    if (passwordModal) passwordModal.classList.remove('hidden');
-    return;
-  }
-
+async function processItem(item, providedPassword = '') {
   item.status = 'processing';
+  item.errorMsg = null;
   renderQueue();
 
   try {
-    // 1. Decrypt document / 문서 복호화
-    const unlockRes = unlockPdfDocument(item.doc, password);
-    if (!unlockRes.success) {
-      item.status = 'error';
-      item.errorMsg = unlockRes.message || t('invalidPassword');
-      renderQueue();
-      return;
+    const arrayBuffer = await item.file.arrayBuffer();
+    const doc = parsePdf(arrayBuffer);
+
+    if (state.currentTab === 'changePerms') {
+      // Change Permissions Mode
+      const targetPermissions = getTargetPermissions();
+      const ownerPassword = ownerPasswordInput.value.trim() || 'master_' + Math.random().toString(36).substr(2, 8);
+      const userPassword = userPasswordInput.value;
+      const algorithm = algorithmSelect.value || 'AES-128';
+
+      const res = changeDocumentPermissions(doc, {
+        permissions: targetPermissions,
+        ownerPassword,
+        userPassword,
+        currentPassword: providedPassword,
+        algorithm
+      });
+
+      if (!res.success) {
+        if (res.message?.includes('Password required') || res.message?.includes('incorrect')) {
+          item.status = 'ready';
+          state.activePasswordItem = item;
+          modalFileDesc.textContent = `"${item.name}" ` + t('modalFileDesc');
+          modalPasswordInput.value = '';
+          passwordModal.classList.remove('hidden');
+          modalPasswordInput.focus();
+          return;
+        }
+        throw new Error(res.message || 'Permission modification failed');
+      }
+
+      const outputBytes = serializePdf(doc);
+      const blob = new Blob([outputBytes], { type: 'application/pdf' });
+      item.resultBlob = blob;
+      item.downloadUrl = URL.createObjectURL(blob);
+      item.status = 'done';
+    } else {
+      // Unlock Mode
+      const res = unlockDocument(doc, providedPassword);
+      if (!res.success) {
+        if (res.message?.includes('Password required') || res.message?.includes('incorrect')) {
+          item.status = 'ready';
+          state.activePasswordItem = item;
+          modalFileDesc.textContent = `"${item.name}" ` + t('modalFileDesc');
+          modalPasswordInput.value = '';
+          passwordModal.classList.remove('hidden');
+          modalPasswordInput.focus();
+          return;
+        }
+        throw new Error(res.message || 'Unlock failed');
+      }
+
+      const outputBytes = serializePdf(doc);
+      const blob = new Blob([outputBytes], { type: 'application/pdf' });
+      item.resultBlob = blob;
+      item.downloadUrl = URL.createObjectURL(blob);
+      item.status = 'done';
     }
-
-    // 2. Serialize to unencrypted PDF bytes / 비암호화 PDF로 직렬화
-    const unlockedBytes = serializePdf(item.doc);
-    const blob = new Blob([unlockedBytes], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-
-    item.resultBlob = blob;
-    item.downloadUrl = url;
-    item.status = 'done';
   } catch (err) {
-    console.error('PDF Unlock Error:', err);
+    console.error('Process error:', err);
     item.status = 'error';
-    item.errorMsg = err.message || t('statusError');
+    item.errorMsg = err.message || 'Processing error';
   }
 
   renderQueue();
 }
 
 /**
- * Render the entire file queue UI.
- * 전체 파일 큐 UI를 렌더링합니다.
+ * Renders the file queue list and status badges.
+ * 파일 목록 큐와 상태를 렌더링합니다.
  */
 function renderQueue() {
-  if (!queueSection || !fileList || !queueCountBadge) return;
-
   if (state.queue.length === 0) {
     queueSection.classList.add('hidden');
-    queueCountBadge.textContent = '0';
     return;
   }
 
   queueSection.classList.remove('hidden');
-  queueCountBadge.textContent = String(state.queue.length);
+  queueCountBadge.textContent = state.queue.length;
   fileList.innerHTML = '';
 
-  state.queue.forEach(item => {
-    const card = document.createElement('div');
-    card.className = 'file-card';
+  state.queue.forEach((item, idx) => {
+    const el = document.createElement('div');
+    el.className = 'file-item';
 
-    // File Top Header
-    const top = document.createElement('div');
-    top.className = 'file-card-top';
-
-    const meta = document.createElement('div');
-    meta.className = 'file-meta';
-
-    const icon = document.createElement('div');
-    icon.className = 'file-icon';
-    icon.textContent = 'PDF';
-
-    const info = document.createElement('div');
-    info.className = 'file-info';
-    const nameEl = document.createElement('h4');
-    nameEl.textContent = item.name;
-    const sizeEl = document.createElement('p');
-    sizeEl.textContent = `${formatFileSize(item.size)} • PDF ${item.doc ? item.doc.headerVersion : '1.7'}`;
-    info.appendChild(nameEl);
-    info.appendChild(sizeEl);
-
-    meta.appendChild(icon);
-    meta.appendChild(info);
-
-    // Actions
-    const actions = document.createElement('div');
-    actions.className = 'file-item-actions';
+    // Status text & badge class
+    let statusText = t('statusReady');
+    let statusClass = 'status-ready';
 
     if (item.status === 'analyzing') {
-      const statusEl = document.createElement('span');
-      statusEl.className = 'badge';
-      statusEl.textContent = t('statusAnalyzing');
-      actions.appendChild(statusEl);
+      statusText = t('statusAnalyzing');
+      statusClass = 'status-analyzing';
     } else if (item.status === 'processing') {
-      const statusEl = document.createElement('span');
-      statusEl.className = 'badge';
-      statusEl.textContent = t('statusDecrypting');
-      actions.appendChild(statusEl);
+      statusText = state.currentTab === 'changePerms' ? t('statusProcessing') : t('statusDecrypting');
+      statusClass = 'status-processing';
     } else if (item.status === 'done') {
-      const dlBtn = document.createElement('a');
-      dlBtn.className = 'btn btn-sm btn-success';
-      dlBtn.href = item.downloadUrl;
-      dlBtn.download = item.name.replace(/\.pdf$/i, '_unlocked.pdf');
-      dlBtn.textContent = `📥 ${t('downloadBtn')}`;
-      actions.appendChild(dlBtn);
+      statusText = t('statusDone');
+      statusClass = 'status-done';
     } else if (item.status === 'error') {
-      const errEl = document.createElement('span');
-      errEl.className = 'badge';
-      errEl.style.color = 'var(--color-danger)';
-      errEl.textContent = item.errorMsg || t('statusError');
-      actions.appendChild(errEl);
+      statusText = item.errorMsg || t('statusError');
+      statusClass = 'status-error';
+    }
 
-      const retryBtn = document.createElement('button');
-      retryBtn.className = 'btn btn-sm btn-secondary';
-      retryBtn.textContent = 'Retry';
-      retryBtn.addEventListener('click', () => processItem(item));
-      actions.appendChild(retryBtn);
-    } else if (item.status === 'ready') {
-      const isEncrypted = item.securityInfo && item.securityInfo.isEncrypted;
-      if (!isEncrypted) {
-        const span = document.createElement('span');
-        span.className = 'badge security-badge';
-        span.textContent = t('alreadyUnlocked');
-        actions.appendChild(span);
-      } else {
-        const unlockBtn = document.createElement('button');
-        unlockBtn.className = 'btn btn-sm btn-primary';
-        unlockBtn.textContent = t('unlockAllBtn');
-        unlockBtn.addEventListener('click', () => processItem(item));
-        actions.appendChild(unlockBtn);
+    // Permission pills summary
+    let permsSummaryHtml = '';
+    if (item.securityInfo) {
+      const p = item.securityInfo.permissions || {};
+      const printClass = p.canPrint ? 'allowed' : 'restricted';
+      const copyClass = p.canCopy ? 'allowed' : 'restricted';
+      const modClass = p.canModify ? 'allowed' : 'restricted';
+
+      permsSummaryHtml = `
+        <div class="file-perms-summary">
+          <span class="badge ${item.securityInfo.isEncrypted ? 'security-badge' : ''}" style="padding: 2px 6px; font-size: 0.72rem;">
+            ${item.securityInfo.isEncrypted ? t('encryptedBadge') : t('unencryptedBadge')}
+          </span>
+          <span class="perm-pill ${printClass}">🖨️ ${p.canPrint ? (p.canPrintHighQuality ? 'Print (High)' : 'Print (Low)') : 'No Print'}</span>
+          <span class="perm-pill ${copyClass}">📋 ${p.canCopy ? 'Copy' : 'No Copy'}</span>
+          <span class="perm-pill ${modClass}">✏️ ${p.canModify ? 'Edit' : 'No Edit'}</span>
+        </div>
+      `;
+    }
+
+    // Actions button
+    let actionBtnHtml = '';
+    if (item.status === 'done' && item.downloadUrl) {
+      const filenamePrefix = state.currentTab === 'changePerms' ? 'secured_' : 'unlocked_';
+      actionBtnHtml = `
+        <a href="${item.downloadUrl}" download="${filenamePrefix}${item.name}" class="btn btn-primary btn-sm">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+          ${state.currentTab === 'changePerms' ? t('applySingleBtn') : t('downloadUnlockedBtn')}
+        </a>
+      `;
+    } else if (item.status === 'ready' || item.status === 'error') {
+      actionBtnHtml = `
+        <button class="btn btn-primary btn-sm item-process-btn" data-id="${item.id}">
+          ${state.currentTab === 'changePerms' ? t('applySingleBtn') : t('downloadUnlockedBtn')}
+        </button>
+      `;
+    }
+
+    el.innerHTML = `
+      <div class="file-item-header">
+        <div class="file-meta">
+          <div class="file-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div>
+            <div class="file-name" title="${item.name}">${item.name}</div>
+            <div class="file-size">${formatFileSize(item.size)}</div>
+          </div>
+        </div>
+        <div class="file-status-badge ${statusClass}">
+          ${statusText}
+        </div>
+      </div>
+      ${permsSummaryHtml}
+      <div class="file-actions">
+        <button class="btn btn-secondary btn-sm item-remove-btn" data-id="${item.id}">✕</button>
+        ${actionBtnHtml}
+      </div>
+    `;
+
+    fileList.appendChild(el);
+  });
+
+  // Attach item action handlers
+  document.querySelectorAll('.item-remove-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const id = e.currentTarget.dataset.id;
+      state.queue = state.queue.filter(q => q.id !== id);
+      renderQueue();
+    });
+  });
+
+  document.querySelectorAll('.item-process-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const id = e.currentTarget.dataset.id;
+      const item = state.queue.find(q => q.id === id);
+      if (item) {
+        await processItem(item);
       }
-    }
-
-    top.appendChild(meta);
-    top.appendChild(actions);
-    card.appendChild(top);
-
-    // Permission Badges Grid
-    if (item.securityInfo && item.securityInfo.isEncrypted) {
-      const permGrid = document.createElement('div');
-      permGrid.className = 'permission-grid';
-
-      const perms = item.securityInfo.permissions;
-      const permItems = [
-        { label: t('permPrint'), allowed: perms.canPrint, icon: '🖨️' },
-        { label: t('permCopy'), allowed: perms.canCopy, icon: '📋' },
-        { label: t('permModify'), allowed: perms.canModify, icon: '✏️' },
-        { label: t('permAnnotate'), allowed: perms.canAnnotate, icon: '💬' }
-      ];
-
-      permItems.forEach(p => {
-        const badge = document.createElement('span');
-        const isNowAllowed = (item.status === 'done') ? true : p.allowed;
-        badge.className = `perm-item ${isNowAllowed ? 'perm-allowed' : 'perm-restricted'}`;
-        badge.textContent = `${p.icon} ${p.label}: ${isNowAllowed ? t('permAllowed') : t('permRestricted')}`;
-        permGrid.appendChild(badge);
-      });
-
-      card.appendChild(permGrid);
-    }
-
-    fileList.appendChild(card);
+    });
   });
 }
 
-// Auto bootstrap on DOM load / DOM 로드 시 실행
-if (typeof document !== 'undefined') {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+// Start application when DOM is loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
 }

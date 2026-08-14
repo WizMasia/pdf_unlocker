@@ -1,24 +1,32 @@
 /**
  * @file src/core/crypto.js
- * @description Standalone Pure JavaScript Cryptographic Engine for PDF Decryption (MD5, SHA-256, RC4, AES-128/256-CBC).
- *              PDF 복호화를 위한 독립형 순수 JavaScript 암호화 엔진 (MD5, SHA-256, RC4, AES-128/256-CBC).
+ * @description Standalone Pure JavaScript Cryptographic Engine for PDF Security (MD5, SHA-256, RC4, AES-128/256-CBC).
+ *              PDF 보안 처리를 위한 독립형 순수 JavaScript 암호화 엔진 (MD5, SHA-256, RC4, AES-128/256-CBC).
  */
 
 /* ==========================================================================
- * 1. MD5 Hash Implementation / MD5 해시 구현
+ * 1. MD5 Hash Implementation (RFC 1321) / MD5 해시 구현
  * ========================================================================== */
 
 /**
  * Calculates MD5 digest of binary input.
  * 바이너리 입력의 MD5 해시를 계산합니다.
- * @param {Uint8Array} input - Input data / 입력 데이터
+ * @param {Uint8Array|ArrayBuffer|string} input - Input data / 입력 데이터
  * @returns {Uint8Array} 16-byte MD5 digest / 16바이트 MD5 다이제스트
  */
 export function md5(input) {
-  const bytes = input instanceof Uint8Array ? input : new Uint8Array(input);
-  const n = bytes.length;
+  let bytes;
+  if (typeof input === 'string') {
+    bytes = new TextEncoder().encode(input);
+  } else if (input instanceof Uint8Array) {
+    bytes = input;
+  } else if (input instanceof ArrayBuffer) {
+    bytes = new Uint8Array(input);
+  } else {
+    bytes = new Uint8Array(input);
+  }
 
-  // Pre-processing / 패딩 처리
+  const n = bytes.length;
   const words = [];
   for (let i = 0; i < n; i++) {
     words[i >> 2] |= (bytes[i] & 0xff) << ((i % 4) * 8);
@@ -27,7 +35,10 @@ export function md5(input) {
   words[(((n + 8) >> 6) << 4) + 14] = (n * 8) & 0xffffffff;
   words[(((n + 8) >> 6) << 4) + 15] = Math.floor((n * 8) / 0x100000000);
 
-  let a = 0x67452301, b = 0xefcdab89, c = 0x98badcfe, d = 0x10325476;
+  let a = 0x67452301;
+  let b = 0xefcdab89;
+  let c = 0x98badcfe;
+  let d = 0x10325476;
 
   function safeAdd(x, y) {
     const lsw = (x & 0xffff) + (y & 0xffff);
@@ -133,145 +144,165 @@ export function md5(input) {
   }
 
   const result = new Uint8Array(16);
-  const finalWords = [a, b, c, d];
-  for (let i = 0; i < 16; i++) {
-    result[i] = (finalWords[i >> 2] >>> ((i % 4) * 8)) & 0xff;
+  const vals = [a, b, c, d];
+  for (let i = 0; i < 4; i++) {
+    result[i * 4 + 0] = vals[i] & 0xff;
+    result[i * 4 + 1] = (vals[i] >> 8) & 0xff;
+    result[i * 4 + 2] = (vals[i] >> 16) & 0xff;
+    result[i * 4 + 3] = (vals[i] >> 24) & 0xff;
   }
   return result;
 }
 
 /* ==========================================================================
- * 2. SHA-256 Hash Implementation / SHA-256 해시 구현
+ * 2. SHA-256 Implementation (FIPS PUB 180-4) / SHA-256 해시 구현
  * ========================================================================== */
+
+const K256 = new Uint32Array([
+  0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+  0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+  0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+  0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+  0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+  0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+  0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+  0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+]);
 
 /**
  * Calculates SHA-256 digest of binary input.
  * 바이너리 입력의 SHA-256 해시를 계산합니다.
- * @param {Uint8Array} input - Input data / 입력 데이터
+ * @param {Uint8Array|ArrayBuffer|string} input - Input data / 입력 데이터
  * @returns {Uint8Array} 32-byte SHA-256 digest / 32바이트 SHA-256 다이제스트
  */
 export function sha256(input) {
-  const bytes = input instanceof Uint8Array ? input : new Uint8Array(input);
-  const n = bytes.length;
+  let bytes;
+  if (typeof input === 'string') {
+    bytes = new TextEncoder().encode(input);
+  } else if (input instanceof Uint8Array) {
+    bytes = input;
+  } else if (input instanceof ArrayBuffer) {
+    bytes = new Uint8Array(input);
+  } else {
+    bytes = new Uint8Array(input);
+  }
 
-  const K = [
-    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
-    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
-    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
-    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
-    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
-    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
-    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
-    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
-  ];
+  const len = bytes.length;
+  const bitLen = len * 8;
+  const padLen = (((len + 8) >> 6) + 1) << 6;
+  const padded = new Uint8Array(padLen);
+  padded.set(bytes, 0);
+  padded[len] = 0x80;
+
+  const view = new DataView(padded.buffer, padded.byteOffset, padded.byteLength);
+  view.setUint32(padLen - 4, bitLen & 0xffffffff, false);
+  view.setUint32(padLen - 8, Math.floor(bitLen / 0x100000000), false);
 
   let h0 = 0x6a09e667, h1 = 0xbb67ae85, h2 = 0x3c6ef372, h3 = 0xa54ff53a;
   let h4 = 0x510e527f, h5 = 0x9b05688c, h6 = 0x1f83d9ab, h7 = 0x5be0cd19;
 
-  const words = [];
-  for (let i = 0; i < n; i++) {
-    words[i >> 2] |= (bytes[i] & 0xff) << (24 - (i % 4) * 8);
-  }
-  words[n >> 2] |= 0x80 << (24 - (n % 4) * 8);
-  words[(((n + 8) >> 6) << 4) + 15] = (n * 8) & 0xffffffff;
+  const w = new Uint32Array(64);
 
-  const W = new Uint32Array(64);
-
-  function ror(x, n) { return (x >>> n) | (x << (32 - n)); }
-
-  for (let i = 0; i < words.length; i += 16) {
-    for (let t = 0; t < 16; t++) W[t] = words[i + t] || 0;
-    for (let t = 16; t < 64; t++) {
-      const s0 = ror(W[t - 15], 7) ^ ror(W[t - 15], 18) ^ (W[t - 15] >>> 3);
-      const s1 = ror(W[t - 2], 17) ^ ror(W[t - 2], 19) ^ (W[t - 2] >>> 10);
-      W[t] = (W[t - 16] + s0 + W[t - 7] + s1) | 0;
+  for (let chunk = 0; chunk < padLen; chunk += 64) {
+    for (let i = 0; i < 16; i++) {
+      w[i] = view.getUint32(chunk + i * 4, false);
+    }
+    for (let i = 16; i < 64; i++) {
+      const s0 = ((w[i - 15] >>> 7) | (w[i - 15] << 25)) ^
+                 ((w[i - 15] >>> 18) | (w[i - 15] << 14)) ^
+                 (w[i - 15] >>> 3);
+      const s1 = ((w[i - 2] >>> 17) | (w[i - 2] << 15)) ^
+                 ((w[i - 2] >>> 19) | (w[i - 2] << 13)) ^
+                 (w[i - 2] >>> 10);
+      w[i] = (w[i - 16] + s0 + w[i - 7] + s1) >>> 0;
     }
 
     let a = h0, b = h1, c = h2, d = h3, e = h4, f = h5, g = h6, h = h7;
 
-    for (let t = 0; t < 64; t++) {
-      const S1 = ror(e, 6) ^ ror(e, 11) ^ ror(e, 25);
+    for (let i = 0; i < 64; i++) {
+      const S1 = ((e >>> 6) | (e << 26)) ^ ((e >>> 11) | (e << 21)) ^ ((e >>> 25) | (e << 7));
       const ch = (e & f) ^ (~e & g);
-      const temp1 = (h + S1 + ch + K[t] + W[t]) | 0;
-      const S0 = ror(a, 2) ^ ror(a, 13) ^ ror(a, 22);
+      const temp1 = (h + S1 + ch + K256[i] + w[i]) >>> 0;
+      const S0 = ((a >>> 2) | (a << 30)) ^ ((a >>> 13) | (a << 19)) ^ ((a >>> 22) | (a << 10));
       const maj = (a & b) ^ (a & c) ^ (b & c);
-      const temp2 = (S0 + maj) | 0;
+      const temp2 = (S0 + maj) >>> 0;
 
       h = g;
       g = f;
       f = e;
-      e = (d + temp1) | 0;
+      e = (d + temp1) >>> 0;
       d = c;
       c = b;
       b = a;
-      a = (temp1 + temp2) | 0;
+      a = (temp1 + temp2) >>> 0;
     }
 
-    h0 = (h0 + a) | 0;
-    h1 = (h1 + b) | 0;
-    h2 = (h2 + c) | 0;
-    h3 = (h3 + d) | 0;
-    h4 = (h4 + e) | 0;
-    h5 = (h5 + f) | 0;
-    h6 = (h6 + g) | 0;
-    h7 = (h7 + h) | 0;
+    h0 = (h0 + a) >>> 0;
+    h1 = (h1 + b) >>> 0;
+    h2 = (h2 + c) >>> 0;
+    h3 = (h3 + d) >>> 0;
+    h4 = (h4 + e) >>> 0;
+    h5 = (h5 + f) >>> 0;
+    h6 = (h6 + g) >>> 0;
+    h7 = (h7 + h) >>> 0;
   }
 
-  const result = new Uint8Array(32);
-  const hs = [h0, h1, h2, h3, h4, h5, h6, h7];
-  for (let i = 0; i < 32; i++) {
-    result[i] = (hs[i >> 2] >>> (24 - (i % 4) * 8)) & 0xff;
-  }
-  return result;
-}
+  const out = new Uint8Array(32);
+  const outView = new DataView(out.buffer);
+  outView.setUint32(0, h0, false);
+  outView.setUint32(4, h1, false);
+  outView.setUint32(8, h2, false);
+  outView.setUint32(12, h3, false);
+  outView.setUint32(16, h4, false);
+  outView.setUint32(20, h5, false);
+  outView.setUint32(24, h6, false);
+  outView.setUint32(28, h7, false);
 
-/* ==========================================================================
- * 3. RC4 Stream Cipher / RC4 스트림 암복호화
- * ========================================================================== */
-
-/**
- * RC4 (ARC4) symmetric stream cipher encryption / decryption.
- * RC4 대칭 스트림 암복호화를 수행합니다.
- * @param {Uint8Array} key - Encryption key (1-256 bytes) / 암호화 키
- * @param {Uint8Array} data - Plaintext or ciphertext / 평문 또는 암호문
- * @returns {Uint8Array} Resulting bytes / 결과 바이트 배열
- */
-export function rc4(key, data) {
-  const k = key instanceof Uint8Array ? key : new Uint8Array(key);
-  const d = data instanceof Uint8Array ? data : new Uint8Array(data);
-  const s = new Uint8Array(256);
-
-  // KSA (Key-Scheduling Algorithm)
-  for (let i = 0; i < 256; i++) s[i] = i;
-  let j = 0;
-  for (let i = 0; i < 256; i++) {
-    j = (j + s[i] + k[i % k.length]) & 0xff;
-    const tmp = s[i];
-    s[i] = s[j];
-    s[j] = tmp;
-  }
-
-  // PRGA (Pseudo-Random Generation Algorithm)
-  const out = new Uint8Array(d.length);
-  let i = 0;
-  j = 0;
-  for (let p = 0; p < d.length; p++) {
-    i = (i + 1) & 0xff;
-    j = (j + s[i]) & 0xff;
-    const tmp = s[i];
-    s[i] = s[j];
-    s[j] = tmp;
-    const kByte = s[(s[i] + s[j]) & 0xff];
-    out[p] = d[p] ^ kByte;
-  }
   return out;
 }
 
 /* ==========================================================================
- * 4. AES-128 / AES-256 CBC Decryption / AES CBC 복호화
+ * 3. RC4 Stream Cipher / RC4 스트림 암호화 및 복호화
  * ========================================================================== */
 
-// AES S-Box & Inverted S-Box tables / AES S-Box 및 역 S-Box 테이블
+/**
+ * RC4 encryption and decryption (Symmetric).
+ * RC4 대칭 스트림 암복호화.
+ * @param {Uint8Array} key - Encryption key / 암호화 키
+ * @param {Uint8Array} data - Input plaintext or ciphertext / 입력 데이터
+ * @returns {Uint8Array} Output ciphertext or plaintext / 암복호화 결과 데이터
+ */
+export function rc4(key, data) {
+  const S = new Uint8Array(256);
+  for (let i = 0; i < 256; i++) S[i] = i;
+
+  let j = 0;
+  for (let i = 0; i < 256; i++) {
+    j = (j + S[i] + key[i % key.length]) & 0xff;
+    const tmp = S[i];
+    S[i] = S[j];
+    S[j] = tmp;
+  }
+
+  let i = 0;
+  j = 0;
+  const out = new Uint8Array(data.length);
+  for (let k = 0; k < data.length; k++) {
+    i = (i + 1) & 0xff;
+    j = (j + S[i]) & 0xff;
+    const tmp = S[i];
+    S[i] = S[j];
+    S[j] = tmp;
+    out[k] = data[k] ^ S[(S[i] + S[j]) & 0xff];
+  }
+
+  return out;
+}
+
+/* ==========================================================================
+ * 4. AES-128 / AES-256 CBC Mode (FIPS 197) / AES 암호화 및 복호화 엔진
+ * ========================================================================== */
+
 const SBOX = new Uint8Array([
   0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
   0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
@@ -291,152 +322,284 @@ const SBOX = new Uint8Array([
   0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16
 ]);
 
-const RSBOX = new Uint8Array(256);
-for (let i = 0; i < 256; i++) RSBOX[SBOX[i]] = i;
+const INV_SBOX = new Uint8Array(256);
+for (let i = 0; i < 256; i++) {
+  INV_SBOX[SBOX[i]] = i;
+}
 
-const RCON = [0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36];
+const RCON = new Uint32Array([
+  0x00000000, 0x01000000, 0x02000000, 0x04000000, 0x08000000, 0x10000000,
+  0x20000000, 0x40000000, 0x80000000, 0x1b000000, 0x36000000
+]);
 
-/**
- * Key expansion for AES.
- * AES 키 확장을 수행합니다.
- */
-function expandKey(key) {
-  const Nk = key.length / 4; // 4 for 128-bit, 8 for 256-bit
-  const Nr = Nk + 6;        // 10 for 128-bit, 14 for 256-bit
+function subWord(w) {
+  return ((SBOX[(w >>> 24) & 0xff] << 24) |
+          (SBOX[(w >>> 16) & 0xff] << 16) |
+          (SBOX[(w >>> 8) & 0xff] << 8) |
+          SBOX[w & 0xff]) >>> 0;
+}
+
+function rotWord(w) {
+  return ((w << 8) | (w >>> 24)) >>> 0;
+}
+
+function keyExpansion(keyBytes) {
+  const keyLen = keyBytes.length; // 16 (AES-128) or 32 (AES-256)
+  const Nk = keyLen / 4;
+  const Nr = Nk + 6;
   const w = new Uint32Array(4 * (Nr + 1));
 
   for (let i = 0; i < Nk; i++) {
-    w[i] = (key[4 * i] << 24) | (key[4 * i + 1] << 16) | (key[4 * i + 2] << 8) | key[4 * i + 3];
-  }
-
-  function rotWord(word) {
-    return ((word << 8) | (word >>> 24)) >>> 0;
-  }
-  function subWord(word) {
-    return ((SBOX[(word >>> 24) & 0xff] << 24) |
-            (SBOX[(word >>> 16) & 0xff] << 16) |
-            (SBOX[(word >>> 8) & 0xff] << 8) |
-            SBOX[word & 0xff]) >>> 0;
+    w[i] = ((keyBytes[4 * i] << 24) |
+            (keyBytes[4 * i + 1] << 16) |
+            (keyBytes[4 * i + 2] << 8) |
+            keyBytes[4 * i + 3]) >>> 0;
   }
 
   for (let i = Nk; i < 4 * (Nr + 1); i++) {
     let temp = w[i - 1];
     if (i % Nk === 0) {
-      temp = (subWord(rotWord(temp)) ^ (RCON[i / Nk] << 24)) >>> 0;
+      temp = (subWord(rotWord(temp)) ^ RCON[Math.floor(i / Nk)]) >>> 0;
     } else if (Nk > 6 && i % Nk === 4) {
       temp = subWord(temp);
     }
     w[i] = (w[i - Nk] ^ temp) >>> 0;
   }
+
   return { w, Nr };
 }
 
-function gmul(a, b) {
-  let p = 0;
+function xtime(a) {
+  return ((a << 1) ^ (((a >> 7) & 1) * 0x1b)) & 0xff;
+}
+
+function mul(a, b) {
+  let res = 0;
   for (let i = 0; i < 8; i++) {
-    if (b & 1) p ^= a;
-    const hi = a & 0x80;
-    a = (a << 1) & 0xff;
-    if (hi) a ^= 0x1b;
+    if ((b & 1) !== 0) res ^= a;
+    a = xtime(a);
     b >>= 1;
   }
-  return p;
+  return res;
 }
 
 /**
- * Decrypts a single 16-byte AES block.
- * 단일 16바이트 AES 블록을 복호화합니다.
+ * Encrypt a single 16-byte block with AES (Column-major standard).
+ * 단일 16바이트 블록 AES 암호화 (열 우선 표준 표현).
  */
-function decryptBlock(block, w, Nr) {
+function aesEncryptBlock(block, roundKeys, Nr) {
   const state = new Uint8Array(16);
-  for (let i = 0; i < 16; i++) state[i] = block[i];
+  state.set(block);
 
-  function addRoundKey(round) {
+  // AddRoundKey 0
+  for (let c = 0; c < 4; c++) {
+    const k = roundKeys[c];
+    state[4 * c + 0] ^= (k >>> 24) & 0xff;
+    state[4 * c + 1] ^= (k >>> 16) & 0xff;
+    state[4 * c + 2] ^= (k >>> 8) & 0xff;
+    state[4 * c + 3] ^= k & 0xff;
+  }
+
+  for (let round = 1; round < Nr; round++) {
+    // 1. SubBytes
+    for (let i = 0; i < 16; i++) state[i] = SBOX[state[i]];
+
+    // 2. ShiftRows: Row 0 unchanged; Row 1 shift left 1; Row 2 shift left 2; Row 3 shift left 3
+    const s1 = state[1]; state[1] = state[5]; state[5] = state[9]; state[9] = state[13]; state[13] = s1;
+    const s2 = state[2]; state[2] = state[10]; state[10] = s2;
+    const s6 = state[6]; state[6] = state[14]; state[14] = s6;
+    const s3 = state[15]; state[15] = state[11]; state[11] = state[7]; state[7] = state[3]; state[3] = s3;
+
+    // 3. MixColumns
     for (let c = 0; c < 4; c++) {
-      const kw = w[round * 4 + c];
-      state[c * 4 + 0] ^= (kw >>> 24) & 0xff;
-      state[c * 4 + 1] ^= (kw >>> 16) & 0xff;
-      state[c * 4 + 2] ^= (kw >>> 8) & 0xff;
-      state[c * 4 + 3] ^= kw & 0xff;
+      const a0 = state[4 * c + 0];
+      const a1 = state[4 * c + 1];
+      const a2 = state[4 * c + 2];
+      const a3 = state[4 * c + 3];
+      state[4 * c + 0] = xtime(a0) ^ (a1 ^ xtime(a1)) ^ a2 ^ a3;
+      state[4 * c + 1] = a0 ^ xtime(a1) ^ (a2 ^ xtime(a2)) ^ a3;
+      state[4 * c + 2] = a0 ^ a1 ^ xtime(a2) ^ (a3 ^ xtime(a3));
+      state[4 * c + 3] = (a0 ^ xtime(a0)) ^ a1 ^ a2 ^ xtime(a3);
+    }
+
+    // 4. AddRoundKey
+    for (let c = 0; c < 4; c++) {
+      const k = roundKeys[round * 4 + c];
+      state[4 * c + 0] ^= (k >>> 24) & 0xff;
+      state[4 * c + 1] ^= (k >>> 16) & 0xff;
+      state[4 * c + 2] ^= (k >>> 8) & 0xff;
+      state[4 * c + 3] ^= k & 0xff;
     }
   }
 
-  function invSubBytes() {
-    for (let i = 0; i < 16; i++) state[i] = RSBOX[state[i]];
-  }
+  // Final Round (No MixColumns)
+  for (let i = 0; i < 16; i++) state[i] = SBOX[state[i]];
 
-  function invShiftRows() {
-    let tmp = state[1]; state[1] = state[13]; state[13] = state[9]; state[9] = state[5]; state[5] = tmp;
-    tmp = state[2]; state[2] = state[10]; state[10] = tmp;
-    tmp = state[6]; state[6] = state[14]; state[14] = tmp;
-    tmp = state[3]; state[3] = state[7]; state[7] = state[11]; state[11] = state[15]; state[15] = tmp;
-  }
+  const s1 = state[1]; state[1] = state[5]; state[5] = state[9]; state[9] = state[13]; state[13] = s1;
+  const s2 = state[2]; state[2] = state[10]; state[10] = s2;
+  const s6 = state[6]; state[6] = state[14]; state[14] = s6;
+  const s3 = state[15]; state[15] = state[11]; state[11] = state[7]; state[7] = state[3]; state[3] = s3;
 
-  function invMixColumns() {
-    for (let c = 0; c < 4; c++) {
-      const a0 = state[c * 4 + 0], a1 = state[c * 4 + 1], a2 = state[c * 4 + 2], a3 = state[c * 4 + 3];
-      state[c * 4 + 0] = gmul(a0, 0x0e) ^ gmul(a1, 0x0b) ^ gmul(a2, 0x0d) ^ gmul(a3, 0x09);
-      state[c * 4 + 1] = gmul(a0, 0x09) ^ gmul(a1, 0x0e) ^ gmul(a2, 0x0b) ^ gmul(a3, 0x0d);
-      state[c * 4 + 2] = gmul(a0, 0x0d) ^ gmul(a1, 0x09) ^ gmul(a2, 0x0e) ^ gmul(a3, 0x0b);
-      state[c * 4 + 3] = gmul(a0, 0x0b) ^ gmul(a1, 0x0d) ^ gmul(a2, 0x09) ^ gmul(a3, 0x0e);
-    }
+  for (let c = 0; c < 4; c++) {
+    const k = roundKeys[Nr * 4 + c];
+    state[4 * c + 0] ^= (k >>> 24) & 0xff;
+    state[4 * c + 1] ^= (k >>> 16) & 0xff;
+    state[4 * c + 2] ^= (k >>> 8) & 0xff;
+    state[4 * c + 3] ^= k & 0xff;
   }
-
-  addRoundKey(Nr);
-  for (let round = Nr - 1; round > 0; round--) {
-    invShiftRows();
-    invSubBytes();
-    addRoundKey(round);
-    invMixColumns();
-  }
-  invShiftRows();
-  invSubBytes();
-  addRoundKey(0);
 
   return state;
 }
 
 /**
- * Decrypts ciphertext using AES-128 or AES-256 in CBC mode.
- * AES-128 또는 AES-256 CBC 모드로 암호문을 복호화합니다.
- * @param {Uint8Array} key - 16-byte (AES-128) or 32-byte (AES-256) key / 키
- * @param {Uint8Array} iv - 16-byte Initialization Vector / 16바이트 IV
- * @param {Uint8Array} ciphertext - Data to decrypt / 복호화할 암호문
- * @param {boolean} [unpad=true] - Strip PKCS#7 padding / PKCS#7 패딩 제거 여부
- * @returns {Uint8Array} Decrypted plaintext / 복호화된 평문
+ * Decrypt a single 16-byte block with AES (Column-major standard).
+ * 단일 16바이트 블록 AES 복호화 (열 우선 표준 표현).
+ */
+function aesDecryptBlock(block, roundKeys, Nr) {
+  const state = new Uint8Array(16);
+  state.set(block);
+
+  // AddRoundKey Nr
+  for (let c = 0; c < 4; c++) {
+    const k = roundKeys[Nr * 4 + c];
+    state[4 * c + 0] ^= (k >>> 24) & 0xff;
+    state[4 * c + 1] ^= (k >>> 16) & 0xff;
+    state[4 * c + 2] ^= (k >>> 8) & 0xff;
+    state[4 * c + 3] ^= k & 0xff;
+  }
+
+  for (let round = Nr - 1; round >= 1; round--) {
+    // 1. InvShiftRows: Row 0 unchanged; Row 1 shift right 1; Row 2 shift right 2; Row 3 shift right 3
+    const s1 = state[13]; state[13] = state[9]; state[9] = state[5]; state[5] = state[1]; state[1] = s1;
+    const s2 = state[2]; state[2] = state[10]; state[10] = s2;
+    const s6 = state[6]; state[6] = state[14]; state[14] = s6;
+    const s3 = state[3]; state[3] = state[7]; state[7] = state[11]; state[11] = state[15]; state[15] = s3;
+
+    // 2. InvSubBytes
+    for (let i = 0; i < 16; i++) state[i] = INV_SBOX[state[i]];
+
+    // 3. AddRoundKey
+    for (let c = 0; c < 4; c++) {
+      const k = roundKeys[round * 4 + c];
+      state[4 * c + 0] ^= (k >>> 24) & 0xff;
+      state[4 * c + 1] ^= (k >>> 16) & 0xff;
+      state[4 * c + 2] ^= (k >>> 8) & 0xff;
+      state[4 * c + 3] ^= k & 0xff;
+    }
+
+    // 4. InvMixColumns
+    for (let c = 0; c < 4; c++) {
+      const s0 = state[4 * c + 0], s1 = state[4 * c + 1], s2 = state[4 * c + 2], s3 = state[4 * c + 3];
+      state[4 * c + 0] = mul(s0, 0x0e) ^ mul(s1, 0x0b) ^ mul(s2, 0x0d) ^ mul(s3, 0x09);
+      state[4 * c + 1] = mul(s0, 0x09) ^ mul(s1, 0x0e) ^ mul(s2, 0x0b) ^ mul(s3, 0x0d);
+      state[4 * c + 2] = mul(s0, 0x0d) ^ mul(s1, 0x09) ^ mul(s2, 0x0e) ^ mul(s3, 0x0b);
+      state[4 * c + 3] = mul(s0, 0x0b) ^ mul(s1, 0x0d) ^ mul(s2, 0x09) ^ mul(s3, 0x0e);
+    }
+  }
+
+  // Final Round (No InvMixColumns)
+  const s1 = state[13]; state[13] = state[9]; state[9] = state[5]; state[5] = state[1]; state[1] = s1;
+  const s2 = state[2]; state[2] = state[10]; state[10] = s2;
+  const s6 = state[6]; state[6] = state[14]; state[14] = s6;
+  const s3 = state[3]; state[3] = state[7]; state[7] = state[11]; state[11] = state[15]; state[15] = s3;
+
+  for (let i = 0; i < 16; i++) state[i] = INV_SBOX[state[i]];
+
+  for (let c = 0; c < 4; c++) {
+    const k = roundKeys[c];
+    state[4 * c + 0] ^= (k >>> 24) & 0xff;
+    state[4 * c + 1] ^= (k >>> 16) & 0xff;
+    state[4 * c + 2] ^= (k >>> 8) & 0xff;
+    state[4 * c + 3] ^= k & 0xff;
+  }
+
+  return state;
+}
+
+/**
+ * AES-128 / AES-256 CBC Mode Encryption with PKCS#7 Padding.
+ * AES-128 / AES-256 CBC 모드 암호화 (PKCS#7 패딩 포함).
+ * @param {Uint8Array} key - 16-byte (AES-128) or 32-byte (AES-256) Key / 암호화 키
+ * @param {Uint8Array} iv - 16-byte Initialization Vector / 16바이트 초기화 벡터
+ * @param {Uint8Array} plaintext - Plaintext data / 평문 데이터
+ * @param {boolean} [pad=true] - Apply PKCS#7 padding / 패딩 적용 여부
+ * @returns {Uint8Array} Ciphertext bytes / 암호화된 바이트 배열
+ */
+export function aesEncryptCbc(key, iv, plaintext, pad = true) {
+  const { w, Nr } = keyExpansion(key);
+  let data = plaintext;
+
+  if (pad) {
+    const padLen = 16 - (plaintext.length % 16);
+    data = new Uint8Array(plaintext.length + padLen);
+    data.set(plaintext, 0);
+    for (let i = plaintext.length; i < data.length; i++) {
+      data[i] = padLen;
+    }
+  }
+
+  const numBlocks = Math.floor(data.length / 16);
+  const out = new Uint8Array(numBlocks * 16);
+  let prevBlock = new Uint8Array(16);
+  prevBlock.set(iv);
+
+  for (let b = 0; b < numBlocks; b++) {
+    const block = new Uint8Array(16);
+    for (let i = 0; i < 16; i++) {
+      block[i] = data[b * 16 + i] ^ prevBlock[i];
+    }
+    const enc = aesEncryptBlock(block, w, Nr);
+    out.set(enc, b * 16);
+    prevBlock.set(enc);
+  }
+
+  return out;
+}
+
+/**
+ * AES-128 / AES-256 CBC Mode Decryption with PKCS#7 Unpadding.
+ * AES-128 / AES-256 CBC 모드 복호화 (PKCS#7 언패딩 포함).
+ * @param {Uint8Array} key - 16-byte (AES-128) or 32-byte (AES-256) Key / 복호화 키
+ * @param {Uint8Array} iv - 16-byte Initialization Vector / 16바이트 초기화 벡터
+ * @param {Uint8Array} ciphertext - Ciphertext data / 암호문 데이터
+ * @param {boolean} [unpad=true] - Remove PKCS#7 padding / 패딩 제거 여부
+ * @returns {Uint8Array} Plaintext bytes / 복호화된 바이트 배열
  */
 export function aesDecryptCbc(key, iv, ciphertext, unpad = true) {
-  const k = key instanceof Uint8Array ? key : new Uint8Array(key);
-  const ivBytes = iv instanceof Uint8Array ? iv : new Uint8Array(iv);
-  const ct = ciphertext instanceof Uint8Array ? ciphertext : new Uint8Array(ciphertext);
-
-  if (ct.length === 0 || ct.length % 16 !== 0) {
-    return ct; // Not a valid AES block size / 유효한 블록 크기가 아님
+  if (ciphertext.length % 16 !== 0) {
+    throw new Error(`Invalid ciphertext length for AES-CBC: ${ciphertext.length}`);
   }
 
-  const { w, Nr } = expandKey(k);
-  const pt = new Uint8Array(ct.length);
-  let prev = ivBytes;
+  const { w, Nr } = keyExpansion(key);
+  const numBlocks = Math.floor(ciphertext.length / 16);
+  const out = new Uint8Array(numBlocks * 16);
+  let prevBlock = new Uint8Array(16);
+  prevBlock.set(iv);
 
-  for (let i = 0; i < ct.length; i += 16) {
-    const block = ct.subarray(i, i + 16);
-    const dec = decryptBlock(block, w, Nr);
-    for (let b = 0; b < 16; b++) {
-      pt[i + b] = dec[b] ^ prev[b];
+  for (let b = 0; b < numBlocks; b++) {
+    const block = ciphertext.subarray(b * 16, (b + 1) * 16);
+    const dec = aesDecryptBlock(block, w, Nr);
+    for (let i = 0; i < 16; i++) {
+      out[b * 16 + i] = dec[i] ^ prevBlock[i];
     }
-    prev = block;
+    prevBlock.set(block);
   }
 
-  if (unpad && pt.length > 0) {
-    const padLen = pt[pt.length - 1];
-    if (padLen > 0 && padLen <= 16) {
+  if (unpad && out.length > 0) {
+    const padLen = out[out.length - 1];
+    if (padLen >= 1 && padLen <= 16) {
       let valid = true;
-      for (let i = pt.length - padLen; i < pt.length; i++) {
-        if (pt[i] !== padLen) { valid = false; break; }
+      for (let i = out.length - padLen; i < out.length; i++) {
+        if (out[i] !== padLen) {
+          valid = false;
+          break;
+        }
       }
-      if (valid) return pt.subarray(0, pt.length - padLen);
+      if (valid) {
+        return out.subarray(0, out.length - padLen);
+      }
     }
   }
 
-  return pt;
+  return out;
 }
