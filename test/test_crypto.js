@@ -6,7 +6,7 @@
 
 import assert from 'assert';
 import crypto from 'crypto';
-import { md5, sha256, rc4, aesEncryptCbc, aesDecryptCbc } from '../src/core/crypto.js';
+import { md5, sha256, sha384, sha512, computeHash2A, computeHash2B, rc4, aesEncryptCbc, aesDecryptCbc } from '../src/core/crypto.js';
 
 console.log('Testing Crypto Engine...');
 
@@ -32,6 +32,18 @@ for (const input of testInputs) {
   assert.strictEqual(pureSha, nativeSha, `SHA-256 mismatch for input: ${input.toString('utf-8')}`);
 }
 console.log('  ✓ SHA-256 tests passed');
+
+// 2-B. SHA-384 & SHA-512 Hash Tests against native crypto / 네이티브 crypto와 SHA-384, SHA-512 비교 검증
+for (const input of testInputs) {
+  const pureSha384 = Buffer.from(sha384(input)).toString('hex');
+  const nativeSha384 = crypto.createHash('sha384').update(input).digest('hex');
+  assert.strictEqual(pureSha384, nativeSha384, `SHA-384 mismatch`);
+
+  const pureSha512 = Buffer.from(sha512(input)).toString('hex');
+  const nativeSha512 = crypto.createHash('sha512').update(input).digest('hex');
+  assert.strictEqual(pureSha512, nativeSha512, `SHA-512 mismatch`);
+}
+console.log('  ✓ SHA-384 and SHA-512 tests passed');
 
 // 3. RC4 Stream Cipher Tests / RC4 암복호화 검증
 const rc4Key = crypto.randomBytes(16);
@@ -104,4 +116,4 @@ for (let i = 0; i < 5; i++) {
 }
 console.log('  ✓ AES-256-CBC encrypt & decrypt tests passed');
 
-console.log('✅ All Crypto Engine tests passed successfully!');
+console.log('🎉 ALL CRYPTO TESTS PASSED!');

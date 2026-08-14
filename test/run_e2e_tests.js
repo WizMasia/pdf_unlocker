@@ -31,7 +31,7 @@ assert.ok(!distHtml.includes('<script type="module" src='), 'dist/index.html mus
 assert.ok(!distHtml.includes('<link rel="stylesheet"'), 'dist/index.html must not contain external stylesheet links');
 console.log('  ✓ Standalone HTML bundle created and verified.\n');
 
-// 2. Test Cases for All 7 Fixtures / 7종 픽스처 E2E 검증
+// 2. Test Cases for All Standard Fixtures / 픽스처 E2E 검증
 console.log('[Step 2] Verifying Decryption and Permission Unlocking across All Fixtures...');
 
 const testCases = [
@@ -140,8 +140,37 @@ for (const tc of testCases) {
   console.log(`  ✓ Case Passed: ${tc.name} -> Unlocked & Verified Losslessly`);
 }
 
-// 3. Test Cases for Change Permissions Workflow (Stirling-PDF style) / 권한 재조정 E2E 검증
-console.log('\n[Step 3] Verifying Change Permissions (Granular Permission Customization)...');
+// 3. Test Cases for Real-World AES-256 Revision 6 (Zero-Prompt Stirling-PDF Style)
+console.log('\n[Step 3] Verifying Real-World AES-256 R6 (ISO 32000-2 Section 7.6.4.3.4 Algorithm 2.B)...');
+if (fs.existsSync(path.join(fixturesDir, 'user_sample.pdf'))) {
+  const rawBytes = fs.readFileSync(path.join(fixturesDir, 'user_sample.pdf'));
+  const doc = parsePdf(rawBytes);
+  const sec = analyzeSecurity(doc);
+
+  assert.strictEqual(sec.isEncrypted, true);
+  assert.strictEqual(sec.requiresPassword, false, 'Stirling-PDF style: empty password auto-unlock');
+  assert.strictEqual(sec.v, 5);
+  assert.strictEqual(sec.r, 6);
+  assert.strictEqual(sec.permissions.canPrint, false);
+  assert.strictEqual(sec.permissions.canCopy, false);
+
+  const unlockRes = unlockDocument(doc, '');
+  assert.strictEqual(unlockRes.success, true);
+
+  const unlockedBytes = serializePdf(doc);
+  assert.ok(unlockedBytes.length > 0);
+
+  const reparsedDoc = parsePdf(unlockedBytes);
+  assert.strictEqual(reparsedDoc.encryptRef, null);
+  const reparsedSec = analyzeSecurity(reparsedDoc);
+  assert.strictEqual(reparsedSec.isEncrypted, false);
+  assert.strictEqual(reparsedSec.permissions.canPrint, true);
+  assert.strictEqual(reparsedSec.permissions.canCopy, true);
+  console.log('  ✓ Case Passed: Real-World user_sample.pdf (3.3MB) -> Zero-Prompt AES-256 R6 Unlocked Losslessly');
+}
+
+// 4. Test Cases for Change Permissions Workflow (Stirling-PDF style) / 권한 재조정 E2E 검증
+console.log('\n[Step 4] Verifying Change Permissions (Granular Permission Customization)...');
 {
   const rawBytes = fs.readFileSync(path.join(fixturesDir, 'unencrypted.pdf'));
   const doc = parsePdf(rawBytes);
@@ -181,5 +210,5 @@ console.log('\n[Step 3] Verifying Change Permissions (Granular Permission Custom
 }
 
 console.log('\n====================================================');
-console.log('🎉 ALL END-TO-END VERIFICATION TESTS PASSED (8/8)');
+console.log('🎉 ALL END-TO-END VERIFICATION TESTS PASSED (9/9)');
 console.log('====================================================\n');

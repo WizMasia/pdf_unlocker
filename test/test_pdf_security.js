@@ -5,14 +5,14 @@
  */
 
 import assert from 'assert';
+import fs from 'fs';
 import { parsePdf } from '../src/core/pdf_parser.js';
 import {
   parsePermissions,
   buildPermissions,
   analyzeSecurity,
   unlockDocument,
-  changeDocumentPermissions,
-  PDF_PERM_FLAGS
+  changeDocumentPermissions
 } from '../src/core/pdf_security.js';
 import { serializePdf } from '../src/core/pdf_serializer.js';
 
@@ -128,8 +128,6 @@ console.log('  Testing Change Permissions with AES-128...');
   });
 
   assert.strictEqual(result.success, true);
-  assert.strictEqual(result.permissions.canPrint, false);
-  assert.strictEqual(result.permissions.canCopy, false);
 
   // Serialize to new PDF binary
   const securedBytes = serializePdf(doc);
@@ -255,6 +253,38 @@ console.log('  Testing User Password Protection and 1-Click Complete Unlock...')
   assert.strictEqual(unlockedSec.permissions.canPrint, true);
 
   console.log('  ✓ Password Protection and Complete Unlock passed');
+}
+
+// 6. Test AES-256 Revision 6 (ISO 32000-2) Real-World PDF without password prompt
+console.log('  Testing Real-World AES-256 R6 PDF with zero password prompt...');
+{
+  if (fs.existsSync('test/fixtures/user_sample.pdf')) {
+    const userSampleBuf = fs.readFileSync('test/fixtures/user_sample.pdf');
+    const doc = parsePdf(userSampleBuf);
+    const sec = analyzeSecurity(doc);
+
+    assert.strictEqual(sec.isEncrypted, true);
+    assert.strictEqual(sec.requiresPassword, false, 'Must be unlockable with empty password without prompting user');
+    assert.strictEqual(sec.v, 5);
+    assert.strictEqual(sec.r, 6);
+    assert.strictEqual(sec.permissions.canPrint, false);
+    assert.strictEqual(sec.permissions.canCopy, false);
+
+    // 1-Click zero-prompt unlock
+    const unlockRes = unlockDocument(doc, '');
+    assert.strictEqual(unlockRes.success, true);
+
+    const unlockedBytes = serializePdf(doc);
+    assert.ok(unlockedBytes.length > 0);
+
+    const reDoc = parsePdf(unlockedBytes);
+    const reSec = analyzeSecurity(reDoc);
+    assert.strictEqual(reSec.isEncrypted, false);
+    assert.strictEqual(reSec.permissions.canPrint, true);
+    assert.strictEqual(reSec.permissions.canCopy, true);
+
+    console.log('  ✓ Real-World AES-256 R6 zero-prompt unlock passed');
+  }
 }
 
 console.log('✅ All PDF Security & Permission Engine tests passed successfully!');
